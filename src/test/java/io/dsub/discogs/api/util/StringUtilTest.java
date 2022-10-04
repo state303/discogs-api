@@ -1,12 +1,15 @@
 package io.dsub.discogs.api.util;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Execution;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.parallel.ExecutionMode.CONCURRENT;
 
+@Execution(CONCURRENT)
 class StringUtilTest {
     @Test
     void encodeToUTF8EncodesNonUTF8CompliantString() {

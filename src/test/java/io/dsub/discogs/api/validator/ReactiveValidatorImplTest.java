@@ -1,6 +1,7 @@
 package io.dsub.discogs.api.validator;
 
 import io.dsub.discogs.api.artist.model.Artist;
+import io.dsub.discogs.api.test.ConcurrentTest;
 import io.dsub.discogs.api.test.TestUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 
-class ReactiveValidatorImplTest {
+class ReactiveValidatorImplTest extends ConcurrentTest {
     @Mock
     Validator validator;
 
@@ -43,7 +44,7 @@ class ReactiveValidatorImplTest {
 
     @Test
     void validateDelegatesReturnFromValidator() {
-        Mono<Artist> artistMono = TestUtil.getRandomArtist(1);
+        Mono<Artist> artistMono = TestUtil.getRandomArtistMono(1);
         assertNotNull(artistMono);
         Artist expected = artistMono.block();
         assertNotNull(expected);

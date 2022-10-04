@@ -3,6 +3,7 @@ package io.dsub.discogs.api.artist.service;
 import io.dsub.discogs.api.artist.dto.ArtistDTO;
 import io.dsub.discogs.api.artist.model.Artist;
 import io.dsub.discogs.api.artist.repository.ArtistRepository;
+import io.dsub.discogs.api.test.ConcurrentTest;
 import io.dsub.discogs.api.test.TestUtil;
 import io.dsub.discogs.api.util.PageUtil;
 import io.dsub.discogs.api.validator.ReactiveValidator;
@@ -36,7 +37,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
-class ArtistServiceImplTest {
+class ArtistServiceImplTest extends ConcurrentTest {
     @Mock
     ArtistRepository artistRepository;
 
@@ -170,14 +171,11 @@ class ArtistServiceImplTest {
 
     @Test
     void updateCallsRepositoryUpdate() {
-        Artist artist = TestUtil.getRandomArtist().block();
-        assertNotNull(artist);
+        int id = TestUtil.getRandomIndexValue();
+        Artist artist = TestUtil.getRandomArtist(id);
         ArtistDTO dto = artist.toDTO().block();
         assertNotNull(dto);
         UpdateArtistCommand cmd = new UpdateArtistCommand("a", "b", "c", "d");
-
-        assertNotNull(artist.getId());
-        Integer id = artist.getId();
 
         given(artistRepository.findById(id))
                 .willReturn(Mono.just(artist));
@@ -215,19 +213,17 @@ class ArtistServiceImplTest {
     @Test
     void findByIdReturnsValidItem() {
         int id = TestUtil.getRandomIndexValue();
-        Mono<Artist> artistMono = TestUtil.getRandomArtist(id);
-        Artist artist = artistMono.block();
-        assertNotNull(artist);
+        Artist artist = TestUtil.getRandomArtist(id);
 
         ArgumentCaptor<Integer> captor = ArgumentCaptor.forClass(Integer.class);
-        given(artistRepository.findById(captor.capture())).willReturn(artistMono);
+        given(artistRepository.findById(captor.capture())).willReturn(Mono.just(artist));
 
         ArtistDTO got = artistService.findById(id).block();
         ArtistDTO expected = artist.toDTO().block();
         assertNotNull(got);
         assertEquals(expected, got);
 
-        assertEquals(id, captor.getValue());
+        assertEquals(artist.getId(), captor.getValue());
     }
 
 

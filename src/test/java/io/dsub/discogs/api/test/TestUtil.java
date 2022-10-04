@@ -14,6 +14,8 @@ import javax.validation.metadata.ConstraintDescriptor;
 import java.util.Random;
 import java.util.Set;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 public class TestUtil {
 
     public static final Random RANDOM = new Random();
@@ -23,27 +25,31 @@ public class TestUtil {
     }
 
     public static Flux<Artist> getRandomArtists(int count) {
-        return Flux.range(1, count).flatMap(TestUtil::getRandomArtist);
+        return Flux.range(1, count).flatMap(TestUtil::getRandomArtistMono);
     }
 
-    public static Mono<Artist> getRandomArtist() {
-        return Mono.just(Artist.builder()
-                .id(100)
-                .dataQuality(getRandomString(10))
-                .profile(getRandomString(100))
-                .name(getRandomString(20))
-                .realName(getRandomString(33))
-                .build());
+    public static Mono<Artist> getRandomArtistMono() {
+        return Mono.just(getRandomArtist());
     }
 
-    public static Mono<Artist> getRandomArtist(int id) {
-        return Mono.just(Artist.builder()
+    public static Artist getRandomArtist() {
+        return getRandomArtist(100);
+    }
+
+    public static Artist getRandomArtist(int id) {
+        Artist artist = Artist.builder()
                 .id(id)
                 .dataQuality(getRandomString(10))
                 .profile(getRandomString(100))
                 .name(getRandomString(20))
                 .realName(getRandomString(33))
-                .build());
+                .build();
+        assertNotNull(artist.getId());
+        return artist;
+    }
+
+    public static Mono<Artist> getRandomArtistMono(int id) {
+        return Mono.just(getRandomArtist(id));
     }
 
     public static ArtistCommand.CreateArtistCommand getCreateCommandFrom(Artist artist) {
