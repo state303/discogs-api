@@ -1,0 +1,9 @@
+server:
+  error:
+    include-stacktrace: never
+  shutdown: graceful
+
+spring:
+  r2dbc:
+    pool:
+      validation-query: SELECT 1
