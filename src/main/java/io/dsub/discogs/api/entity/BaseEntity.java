@@ -27,7 +27,7 @@ public abstract class BaseEntity<T> implements Persistable<T> {
         return this.isNew;
     }
 
-    private void setAsNew() {
+    protected void setAsNew() {
         this.isNew = true;
     }
 

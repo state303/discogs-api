@@ -8,7 +8,7 @@ import javax.validation.constraints.NotNull;
 public class ArtistCommand {
     @Getter
     @RequiredArgsConstructor
-    public static class CreateArtistCommand {
+    public static class Create {
         @NotNull
         private final Integer id;
         @NotNull
@@ -20,7 +20,7 @@ public class ArtistCommand {
 
     @Getter
     @RequiredArgsConstructor
-    public static class UpdateArtistCommand {
+    public static class Update {
         @NotNull
         private final String name;
         private final String realName;

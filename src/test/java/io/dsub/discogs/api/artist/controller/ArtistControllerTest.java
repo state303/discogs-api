@@ -80,7 +80,7 @@ class ArtistControllerTest extends ConcurrentTest {
     @Test
     void createArtistCallsService() {
         Artist artist = TestUtil.getRandomArtist();
-        ArtistCommand.CreateArtistCommand command = TestUtil.getCreateCommandFrom(artist);
+        ArtistCommand.Create command = TestUtil.getCreateCommandFrom(artist);
         ArtistDTO expected = artist.toDTO().block();
         given(artistService.updateOrInsert(command)).willReturn(artist.toDTO());
 
@@ -100,7 +100,7 @@ class ArtistControllerTest extends ConcurrentTest {
         Artist artist = TestUtil.getRandomArtist(id);
         Artist other = TestUtil.getRandomArtist(id);
 
-        ArtistCommand.UpdateArtistCommand command = TestUtil.getUpdateCommandFrom(artist);
+        ArtistCommand.Update command = TestUtil.getUpdateCommandFrom(artist);
         Mono<ArtistDTO> expectedMono = artist.withMutableDataFrom(command).toDTO();
         given(artistService.update(id, command)).willReturn(expectedMono);
 

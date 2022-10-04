@@ -12,8 +12,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
-import static io.dsub.discogs.api.artist.command.ArtistCommand.CreateArtistCommand;
-import static io.dsub.discogs.api.artist.command.ArtistCommand.UpdateArtistCommand;
+import static io.dsub.discogs.api.artist.command.ArtistCommand.Create;
+import static io.dsub.discogs.api.artist.command.ArtistCommand.Update;
 
 @Slf4j
 @RestController
@@ -37,12 +37,12 @@ public class ArtistController {
     }
 
     @PostMapping
-    public ResponseEntity<Mono<ArtistDTO>> createArtist(final @RequestBody CreateArtistCommand command) {
+    public ResponseEntity<Mono<ArtistDTO>> createArtist(final @RequestBody Create command) {
         return ResponseEntity.ok(artistService.updateOrInsert(command));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Mono<ArtistDTO>> updateArtist(final @PathVariable Integer id, final @RequestBody UpdateArtistCommand command) {
+    public ResponseEntity<Mono<ArtistDTO>> updateArtist(final @PathVariable Integer id, final @RequestBody Update command) {
         return ResponseEntity.ok(artistService.update(id, command));
     }
 

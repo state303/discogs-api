@@ -1,7 +1,7 @@
 package io.dsub.discogs.api.artist.service;
 
-import static io.dsub.discogs.api.artist.command.ArtistCommand.UpdateArtistCommand;
-import static io.dsub.discogs.api.artist.command.ArtistCommand.CreateArtistCommand;
+import static io.dsub.discogs.api.artist.command.ArtistCommand.Update;
+import static io.dsub.discogs.api.artist.command.ArtistCommand.Create;
 
 import io.dsub.discogs.api.artist.dto.ArtistDTO;
 import org.springframework.data.domain.Page;
@@ -11,9 +11,9 @@ import reactor.core.publisher.Mono;
 public interface ArtistService {
     Mono<Page<ArtistDTO>> getArtistsByPageAndSize(Pageable pageable);
 
-    Mono<ArtistDTO> updateOrInsert(CreateArtistCommand command);
+    Mono<ArtistDTO> updateOrInsert(Create command);
 
-    Mono<ArtistDTO> update(int id, UpdateArtistCommand command);
+    Mono<ArtistDTO> update(int id, Update command);
 
     Mono<Void> delete(int id);
 

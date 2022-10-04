@@ -52,8 +52,8 @@ public class TestUtil {
         return Mono.just(getRandomArtist(id));
     }
 
-    public static ArtistCommand.CreateArtistCommand getCreateCommandFrom(Artist artist) {
-        return new ArtistCommand.CreateArtistCommand(
+    public static ArtistCommand.Create getCreateCommandFrom(Artist artist) {
+        return new ArtistCommand.Create(
                 artist.getId(),
                 artist.getName(),
                 artist.getRealName(),
@@ -61,8 +61,8 @@ public class TestUtil {
                 artist.getDataQuality());
     }
 
-    public static ArtistCommand.UpdateArtistCommand getUpdateCommandFrom(Artist artist) {
-        return new ArtistCommand.UpdateArtistCommand(
+    public static ArtistCommand.Update getUpdateCommandFrom(Artist artist) {
+        return new ArtistCommand.Update(
                 artist.getName(),
                 artist.getRealName(),
                 artist.getProfile(),

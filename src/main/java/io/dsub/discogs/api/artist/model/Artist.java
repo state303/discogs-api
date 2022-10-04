@@ -9,6 +9,8 @@ import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 import reactor.core.publisher.Mono;
 
+import javax.validation.constraints.NotBlank;
+
 
 @Data
 @ToString
@@ -23,6 +25,7 @@ public class Artist extends BaseEntity<Integer> {
     private Integer id;
 
     @Column("name")
+    @NotBlank
     private String name;
 
     @Column("real_name")
@@ -34,7 +37,7 @@ public class Artist extends BaseEntity<Integer> {
     @Column("data_quality")
     private String dataQuality;
 
-    public Artist withMutableDataFrom(ArtistCommand.UpdateArtistCommand that) {
+    public Artist withMutableDataFrom(ArtistCommand.Update that) {
         return Artist.builder()
                 .id(this.id)
                 .profile(that.getProfile())

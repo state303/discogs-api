@@ -29,8 +29,8 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-import static io.dsub.discogs.api.artist.command.ArtistCommand.CreateArtistCommand;
-import static io.dsub.discogs.api.artist.command.ArtistCommand.UpdateArtistCommand;
+import static io.dsub.discogs.api.artist.command.ArtistCommand.Create;
+import static io.dsub.discogs.api.artist.command.ArtistCommand.Update;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
@@ -115,7 +115,7 @@ class ArtistServiceImplTest extends ConcurrentTest {
         AtomicInteger found = new AtomicInteger(0);
 
         artists.forEach(artist -> {
-            CreateArtistCommand createCommand = TestUtil.getCreateCommandFrom(artist);
+            Create createCommand = TestUtil.getCreateCommandFrom(artist);
             given(artistRepository.insertOrUpdate(createCommand)).willReturn(Mono.just(artist));
             ArtistDTO expected = artist.toDTO().block();
             ArtistDTO got = artistService.updateOrInsert(createCommand).block();
@@ -134,16 +134,16 @@ class ArtistServiceImplTest extends ConcurrentTest {
 
     @Test
     void insertOrUpdateThrowsIfMissingName() {
-        CreateArtistCommand command =
-                new CreateArtistCommand(3, null, null, null, null);
+        Create command =
+                new Create(3, null, null, null, null);
 
         String error = "test error message";
 
         given(validator.validate(command))
                 .willReturn(Mono.error(new RuntimeException(error)));
 
-        ArgumentCaptor<CreateArtistCommand> argumentCaptor =
-                ArgumentCaptor.forClass(CreateArtistCommand.class);
+        ArgumentCaptor<Create> argumentCaptor =
+                ArgumentCaptor.forClass(Create.class);
 
         StepVerifier.create(artistService.updateOrInsert(command))
                 .expectErrorMessage(error)
@@ -159,8 +159,8 @@ class ArtistServiceImplTest extends ConcurrentTest {
         given(validator.validate(any()))
                 .willReturn(Mono.error(new RuntimeException(error)));
 
-        ArgumentCaptor<CreateArtistCommand> captor =
-                ArgumentCaptor.forClass(CreateArtistCommand.class);
+        ArgumentCaptor<Create> captor =
+                ArgumentCaptor.forClass(Create.class);
 
         StepVerifier.create(artistService.updateOrInsert(null))
                 .expectErrorMessage(error)
@@ -175,7 +175,7 @@ class ArtistServiceImplTest extends ConcurrentTest {
         Artist artist = TestUtil.getRandomArtist(id);
         ArtistDTO dto = artist.toDTO().block();
         assertNotNull(dto);
-        UpdateArtistCommand cmd = new UpdateArtistCommand("a", "b", "c", "d");
+        Update cmd = new Update("a", "b", "c", "d");
 
         given(artistRepository.findById(id))
                 .willReturn(Mono.just(artist));

@@ -1,6 +1,6 @@
 package io.dsub.discogs.api.artist.repository;
 
-import io.dsub.discogs.api.artist.command.ArtistCommand.CreateArtistCommand;
+import io.dsub.discogs.api.artist.command.ArtistCommand.Create;
 import io.dsub.discogs.api.artist.model.Artist;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.r2dbc.repository.Query;
@@ -22,7 +22,7 @@ public interface ArtistRepository extends R2dbcRepository<Artist, Integer> {
             "real_name=excluded.real_name " +
             "WHERE artist.id=excluded.id")
     // @formatter:on
-    Mono<Artist> insertOrUpdate(CreateArtistCommand command);
+    Mono<Artist> insertOrUpdate(Create command);
 
     Flux<Artist> findAllByNameNotNullOrderByNameAscIdAsc(final Pageable page);
 }

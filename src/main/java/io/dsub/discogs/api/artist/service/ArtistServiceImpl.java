@@ -1,7 +1,7 @@
 package io.dsub.discogs.api.artist.service;
 
-import io.dsub.discogs.api.artist.command.ArtistCommand.CreateArtistCommand;
-import io.dsub.discogs.api.artist.command.ArtistCommand.UpdateArtistCommand;
+import io.dsub.discogs.api.artist.command.ArtistCommand.Create;
+import io.dsub.discogs.api.artist.command.ArtistCommand.Update;
 import io.dsub.discogs.api.artist.dto.ArtistDTO;
 import io.dsub.discogs.api.artist.model.Artist;
 import io.dsub.discogs.api.artist.repository.ArtistRepository;
@@ -38,14 +38,14 @@ public class ArtistServiceImpl implements ArtistService {
     }
 
     @Override
-    public Mono<ArtistDTO> updateOrInsert(CreateArtistCommand command) {
+    public Mono<ArtistDTO> updateOrInsert(Create command) {
         return validator.validate(command)
                 .flatMap(artistRepository::insertOrUpdate)
                 .flatMap(mapToDTO());
     }
 
     @Override
-    public Mono<ArtistDTO> update(int id, UpdateArtistCommand command) {
+    public Mono<ArtistDTO> update(int id, Update command) {
         return artistRepository.findById(id)
                 .flatMap(artist -> saveArtistAfterUpdate(artist, command))
                 .flatMap(mapToDTO())
@@ -70,7 +70,7 @@ public class ArtistServiceImpl implements ArtistService {
         return Artist::toDTO;
     }
 
-    private Mono<Artist> saveArtistAfterUpdate(Artist artist, UpdateArtistCommand command) {
+    private Mono<Artist> saveArtistAfterUpdate(Artist artist, Update command) {
         return this.artistRepository.save(artist.withMutableDataFrom(command));
     }
 }
