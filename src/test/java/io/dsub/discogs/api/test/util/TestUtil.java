@@ -1,4 +1,4 @@
-package io.dsub.discogs.api.test;
+package io.dsub.discogs.api.test.util;
 
 import io.dsub.discogs.api.artist.command.ArtistCommand;
 import io.dsub.discogs.api.artist.model.Artist;

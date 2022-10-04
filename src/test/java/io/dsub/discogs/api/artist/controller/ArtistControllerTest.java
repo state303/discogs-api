@@ -5,7 +5,7 @@ import io.dsub.discogs.api.artist.dto.ArtistDTO;
 import io.dsub.discogs.api.artist.model.Artist;
 import io.dsub.discogs.api.artist.service.ArtistService;
 import io.dsub.discogs.api.test.ConcurrentTest;
-import io.dsub.discogs.api.test.TestUtil;
+import io.dsub.discogs.api.test.util.TestUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;

@@ -4,7 +4,7 @@ import io.dsub.discogs.api.artist.dto.ArtistDTO;
 import io.dsub.discogs.api.artist.model.Artist;
 import io.dsub.discogs.api.artist.repository.ArtistRepository;
 import io.dsub.discogs.api.test.ConcurrentTest;
-import io.dsub.discogs.api.test.TestUtil;
+import io.dsub.discogs.api.test.util.TestUtil;
 import io.dsub.discogs.api.util.PageUtil;
 import io.dsub.discogs.api.validator.ReactiveValidator;
 import io.dsub.discogs.api.validator.ReactiveValidatorImpl;
