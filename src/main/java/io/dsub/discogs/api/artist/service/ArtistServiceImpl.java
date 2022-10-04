@@ -7,6 +7,7 @@ import io.dsub.discogs.api.artist.model.Artist;
 import io.dsub.discogs.api.artist.repository.ArtistRepository;
 import io.dsub.discogs.api.exception.NoSuchElementException;
 import io.dsub.discogs.api.util.PageUtil;
+import io.dsub.discogs.api.validator.ReactiveValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -23,6 +24,8 @@ import java.util.function.Function;
 public class ArtistServiceImpl implements ArtistService {
     private final ArtistRepository artistRepository;
 
+    private final ReactiveValidator validator;
+
     @Override
     public Mono<Page<ArtistDTO>> getArtistsByPageAndSize(Pageable pageable) {
         final Pageable notNullPageable = PageUtil.getOrDefaultPageable(pageable);
@@ -36,8 +39,9 @@ public class ArtistServiceImpl implements ArtistService {
 
     @Override
     public Mono<ArtistDTO> updateOrInsert(CreateArtistCommand command) {
-        return artistRepository.insertOrUpdate(command)
-                .flatMap(Artist::toDTO);
+        return validator.validate(command)
+                .flatMap(artistRepository::insertOrUpdate)
+                .flatMap(mapToDTO());
     }
 
     @Override
@@ -50,7 +54,9 @@ public class ArtistServiceImpl implements ArtistService {
 
     @Override
     public Mono<Void> delete(int id) {
-        return artistRepository.deleteById(id);
+        return Mono.just(id)
+                .filter(i -> i > 0)
+                .flatMap(artistRepository::deleteById);
     }
 
     @Override

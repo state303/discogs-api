@@ -11,7 +11,6 @@ import reactor.core.publisher.Mono;
 
 
 @Data
-@With
 @ToString
 @Builder
 @NoArgsConstructor
@@ -36,11 +35,13 @@ public class Artist extends BaseEntity<Integer> {
     private String dataQuality;
 
     public Artist withMutableDataFrom(ArtistCommand.UpdateArtistCommand that) {
-        this.name = that.getName();
-        this.realName = that.getRealName();
-        this.profile = that.getProfile();
-        this.dataQuality = that.getDataQuality();
-        return this;
+        return Artist.builder()
+                .id(this.id)
+                .profile(that.getProfile())
+                .dataQuality(that.getDataQuality())
+                .realName(that.getRealName())
+                .name(that.getName())
+                .build();
     }
 
     public Mono<ArtistDTO> toDTO() {

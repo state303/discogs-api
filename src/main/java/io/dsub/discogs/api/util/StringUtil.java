@@ -5,7 +5,6 @@ import java.nio.charset.StandardCharsets;
 
 public final class StringUtil {
     private StringUtil() {}
-
     public static String encodeToUTF8(String value) {
         if (value == null || value.length() == 0) {
             return value;

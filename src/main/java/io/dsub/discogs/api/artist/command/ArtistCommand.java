@@ -11,6 +11,7 @@ public class ArtistCommand {
     public static class CreateArtistCommand {
         @NotNull
         private final Integer id;
+        @NotNull
         private final String name;
         private final String realName;
         private final String profile;
@@ -20,6 +21,7 @@ public class ArtistCommand {
     @Getter
     @RequiredArgsConstructor
     public static class UpdateArtistCommand {
+        @NotNull
         private final String name;
         private final String realName;
         private final String profile;
