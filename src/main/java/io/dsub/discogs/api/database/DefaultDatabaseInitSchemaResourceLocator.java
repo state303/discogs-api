@@ -1,5 +1,6 @@
 package io.dsub.discogs.api.database;
 
+import io.dsub.discogs.api.exception.UnsupportedDatabaseException;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
@@ -7,10 +8,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class DefaultDatabaseInitSchemaResourceLocator implements DatabaseInitSchemaResourceLocator {
     @Override
-    public Resource getInitSchemaResourceFrom(DatabaseType type) {
+    public Resource getInitSchemaResourceFrom(DatabaseType type) throws UnsupportedDatabaseException {
         if (type == DatabaseType.POSTGRESQL) {
             return new ClassPathResource("postgres-schema.sql");
         }
-        throw new UnsupportedOperationException("only postgresql is supported at this point");
+        throw new UnsupportedDatabaseException(type.name());
     }
 }
