@@ -58,7 +58,7 @@ class ArtistServiceImplTest extends ConcurrentTest {
         given(artistRepository.findAllByNameNotNullOrderByNameAscIdAsc(pageRequest)).willReturn(Flux.empty());
         given(artistRepository.count()).willReturn(Mono.just((long) 0));
 
-        Page<ArtistDTO> page = artistService.getArtistsByPageAndSize(pageRequest).block();
+        Page<ArtistDTO> page = artistService.getArtistsByPageable(pageRequest).block();
 
         assertNotNull(page);
         assertEquals(0, page.getTotalElements());
@@ -77,7 +77,7 @@ class ArtistServiceImplTest extends ConcurrentTest {
 
 
         Iterator<Artist> artistIterator = artists.iterator();
-        Page<ArtistDTO> page = artistService.getArtistsByPageAndSize(pageRequest).block();
+        Page<ArtistDTO> page = artistService.getArtistsByPageable(pageRequest).block();
 
         assertNotNull(page);
         assertEquals(5, page.getTotalElements());
@@ -96,7 +96,7 @@ class ArtistServiceImplTest extends ConcurrentTest {
         given(artistRepository.findAllByNameNotNullOrderByNameAscIdAsc(captor.capture())).willReturn(Flux.empty());
         given(artistRepository.count()).willReturn(Mono.just((long) 0));
 
-        Page<ArtistDTO> page = artistService.getArtistsByPageAndSize(null).block();
+        Page<ArtistDTO> page = artistService.getArtistsByPageable(null).block();
 
         assertNotNull(page);
         assertEquals(0, page.getTotalElements());

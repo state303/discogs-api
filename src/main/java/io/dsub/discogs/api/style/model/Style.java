@@ -1,10 +1,13 @@
 package io.dsub.discogs.api.style.model;
 
 import io.dsub.discogs.api.entity.BaseEntity;
+import io.dsub.discogs.api.style.dto.StyleDTO;
 import lombok.*;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
+import reactor.core.publisher.Mono;
 
 import javax.validation.constraints.Size;
 
@@ -17,14 +20,18 @@ import javax.validation.constraints.Size;
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
 public class Style extends BaseEntity<String> {
-
     @Id
     @Size(min = 1, max = 255)
     @Column("name")
     private String name;
 
     @Override
+    @Transient
     public String getId() {
         return getName();
+    }
+
+    public Mono<StyleDTO> toDTO() {
+        return Mono.just(new StyleDTO(getName()));
     }
 }

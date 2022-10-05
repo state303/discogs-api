@@ -6,9 +6,11 @@ import lombok.RequiredArgsConstructor;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-public final class StyleCommand {
+public abstract class StyleCommand {
 
     private StyleCommand(){}
+
+    public abstract String getName();
 
     @Getter
     @RequiredArgsConstructor

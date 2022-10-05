@@ -27,12 +27,11 @@ public class ArtistServiceImpl implements ArtistService {
     private final ReactiveValidator validator;
 
     @Override
-    public Mono<Page<ArtistDTO>> getArtistsByPageAndSize(Pageable pageable) {
+    public Mono<Page<ArtistDTO>> getArtistsByPageable(Pageable pageable) {
         final Pageable notNullPageable = PageUtil.getOrDefaultPageable(pageable);
-        return artistRepository.findAllByNameNotNullOrderByNameAscIdAsc(PageUtil.getOrDefaultPageable(notNullPageable))
+        return artistRepository.findAllByNameNotNullOrderByNameAscIdAsc(notNullPageable)
                 .flatMap(Artist::toDTO)
                 .collectList()
-                .cache()
                 .zipWith(artistRepository.count())
                 .map(tuple -> new PageImpl<>(tuple.getT1(), notNullPageable, tuple.getT2()));
     }

@@ -41,7 +41,7 @@ class ArtistControllerTest extends ConcurrentTest {
     void getArtistsByPageReturnsDelegatedResult() {
         Pageable pageable = PageRequest.of(3, 10);
         Page<ArtistDTO> expected = new PageImpl<>(List.of());
-        given(artistService.getArtistsByPageAndSize(pageable)).willReturn(Mono.just(expected));
+        given(artistService.getArtistsByPageable(pageable)).willReturn(Mono.just(expected));
 
         ResponseEntity<Mono<Page<ArtistDTO>>> response = artistController.getArtistsByPage(pageable);
 
@@ -54,7 +54,7 @@ class ArtistControllerTest extends ConcurrentTest {
         assertEquals(expected, got);
         assertEquals(expected.getTotalElements(), 0);
 
-        verify(artistService, times(1)).getArtistsByPageAndSize(pageable);
+        verify(artistService, times(1)).getArtistsByPageable(pageable);
     }
 
     @Test

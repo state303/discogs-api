@@ -9,7 +9,7 @@ import org.springframework.data.domain.Pageable;
 import reactor.core.publisher.Mono;
 
 public interface ArtistService {
-    Mono<Page<ArtistDTO>> getArtistsByPageAndSize(Pageable pageable);
+    Mono<Page<ArtistDTO>> getArtistsByPageable(Pageable pageable);
 
     Mono<ArtistDTO> updateOrInsert(Create command);
 

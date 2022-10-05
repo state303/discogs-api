@@ -6,13 +6,14 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
 import javax.validation.Path;
 import javax.validation.Validator;
 import javax.validation.executable.ExecutableValidator;
 import javax.validation.metadata.BeanDescriptor;
 import javax.validation.metadata.ConstraintDescriptor;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -81,6 +82,17 @@ public class TestUtil {
                 .limit(size)
                 .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
                 .toString();
+    }
+
+    public static <T> ConstraintViolationException getConstraintViolationException(String... messages) {
+        Set<ConstraintViolation<T>> violations = new HashSet<>();
+        if (messages == null || messages.length == 0) {
+            return new ConstraintViolationException(violations);
+        }
+        violations = Arrays.stream(messages)
+                .map(TestUtil::<T>getConstraintViolation)
+                .collect(Collectors.toSet());
+        return new ConstraintViolationException(violations);
     }
 
     public static <T> ConstraintViolation<T> getConstraintViolation(String message) {
