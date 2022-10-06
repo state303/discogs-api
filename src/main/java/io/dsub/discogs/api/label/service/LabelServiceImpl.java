@@ -37,7 +37,7 @@ public class LabelServiceImpl implements LabelService {
     @Override
     public Mono<LabelDTO> updateLabel(Integer id, LabelCommand.Update command) {
         return validate(command)
-                .then(labelRepository.findById(id))
+                .flatMap(cmd -> labelRepository.findById(id))
                 .flatMap(label -> Mono.just(label.withMutableDataFrom(command)))
                 .flatMap(labelRepository::save)
                 .flatMap(toDTO)
