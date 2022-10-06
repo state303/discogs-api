@@ -1,5 +1,6 @@
 package io.dsub.discogs.api.label.repository;
 
+import io.dsub.discogs.api.label.command.LabelCommand;
 import io.dsub.discogs.api.label.model.Label;
 import org.springframework.data.r2dbc.repository.Query;
 import org.springframework.data.r2dbc.repository.R2dbcRepository;
@@ -16,5 +17,5 @@ public interface LabelRepository extends R2dbcRepository<Label, Integer> {
             "data_quality=excluded.data_quality, " +
             "name=excluded.name, " +
             "profile=excluded.profile")
-    Mono<Label> saveOrUpdate(Label label);
+    Mono<Label> saveOrUpdate(LabelCommand.Create command);
 }

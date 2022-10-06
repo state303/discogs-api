@@ -3,7 +3,7 @@
 name: Labeler
 
 # On pull requests
-on: [pull_request_target]
+on: [ pull_request_target ]
 
 jobs:
   triage:

@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.time.Duration;
 import java.util.function.Function;
 
 
@@ -22,6 +21,7 @@ public class StyleServiceImpl implements StyleService {
 
     private final StyleRepository styleRepository;
     private final Validator validator;
+    private final Function<Style, Mono<StyleDTO>> toDTO = style -> Mono.just(style.toDTO());
 
     @Override
     public Flux<StyleDTO> findAll() {
@@ -47,11 +47,10 @@ public class StyleServiceImpl implements StyleService {
                 .flatMap(validatedCommand -> Mono.just(validatedCommand.getName()))
                 .flatMap(styleRepository::deleteById);
     }
-    public Mono<Long> count() {
-        return styleRepository.count().cache(Duration.ofSeconds(1));
-    }
 
-    private final Function<Style, Mono<StyleDTO>> toDTO = style -> Mono.just(style.toDTO());
+    public Mono<Long> count() {
+        return styleRepository.count();
+    }
 
     @Override
     public <T> Mono<T> validate(T item) {

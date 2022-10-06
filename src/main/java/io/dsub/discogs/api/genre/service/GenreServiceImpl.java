@@ -4,7 +4,6 @@ import io.dsub.discogs.api.genre.command.GenreCommand;
 import io.dsub.discogs.api.genre.dto.GenreDTO;
 import io.dsub.discogs.api.genre.model.Genre;
 import io.dsub.discogs.api.genre.repository.GenreRepository;
-import io.dsub.discogs.api.service.PagingService;
 import io.dsub.discogs.api.validator.Validator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -21,6 +20,7 @@ public class GenreServiceImpl implements GenreService {
 
     private final GenreRepository genreRepository;
     private final Validator validator;
+    private final Function<Genre, Mono<GenreDTO>> toDTO = artist -> Mono.just(artist.toDTO());
 
     @Override
     public Flux<GenreDTO> findAll() {
@@ -39,6 +39,7 @@ public class GenreServiceImpl implements GenreService {
                 .flatMap(genreRepository::saveOrUpdate)
                 .flatMap(toDTO);
     }
+
     @Override
     public Mono<Void> delete(GenreCommand.Delete command) {
         return validate(command).flatMap(validated -> deleteGenreByName(validated.getName()));
@@ -51,8 +52,6 @@ public class GenreServiceImpl implements GenreService {
     private Mono<Void> deleteGenreByName(String name) {
         return genreRepository.deleteById(name);
     }
-
-    private final Function<Genre, Mono<GenreDTO>> toDTO = artist -> Mono.just(artist.toDTO());
 
     @Override
     public <T> Mono<T> validate(T item) {

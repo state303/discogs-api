@@ -374,21 +374,22 @@ create table if not exists public.artist_member
     constraint uq_artist_member_artist_id_member_id unique (artist_id, member_id)
 );
 
-CREATE OR REPLACE FUNCTION create_constraint_if_not_exists (t_name text, c_name text, constraint_sql text)
+CREATE OR REPLACE FUNCTION create_constraint_if_not_exists(t_name text, c_name text, constraint_sql text)
     RETURNS void
 AS
 '
-BEGIN
-    IF NOT EXISTS (SELECT constraint_name
-                   FROM information_schema.constraint_column_usage
-                   WHERE constraint_name = c_name) THEN
-        EXECUTE ''ALTER TABLE '' || t_name || '' ADD CONSTRAINT '' || c_name || '' '' || constraint_sql;
-    END IF;
-END;
+    BEGIN
+        IF NOT EXISTS(SELECT constraint_name
+                      FROM information_schema.constraint_column_usage
+                      WHERE constraint_name = c_name) THEN
+            EXECUTE ''ALTER TABLE '' || t_name || '' ADD CONSTRAINT '' || c_name || '' '' || constraint_sql;
+        END IF;
+    END;
 '
     LANGUAGE plpgsql VOLATILE;
 
-SELECT create_constraint_if_not_exists('public.release_item', 'fk_release_item_master_id_master', 'foreign key (master_id) references public.master;');
+SELECT create_constraint_if_not_exists('public.release_item', 'fk_release_item_master_id_master',
+                                       'foreign key (master_id) references public.master;');
 
 
 -- ALTER TABLE public.release_item

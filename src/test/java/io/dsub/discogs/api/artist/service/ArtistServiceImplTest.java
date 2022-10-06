@@ -76,7 +76,7 @@ class ArtistServiceImplTest extends ConcurrentTest {
     @Test
     void getArtistsByPageAndSizeWithNoArtists() {
         Pageable pageRequest = PageRequest.of(0, 5);
-        given(artistRepository.findAllByNameNotNull(pageRequest)).willReturn(Flux.empty());
+        given(artistRepository.findAll(pageRequest.getSort())).willReturn(Flux.empty());
         given(artistRepository.count()).willReturn(Mono.just((long) 0));
 
         Page<ArtistDTO> page = artistService.getArtists(pageRequest).block();
@@ -93,7 +93,7 @@ class ArtistServiceImplTest extends ConcurrentTest {
 
         assertNotNull(artists);
 
-        given(artistRepository.findAllByNameNotNull(pageRequest)).willReturn(Flux.fromIterable(artists));
+        given(artistRepository.findAll(pageRequest.getSort())).willReturn(Flux.fromIterable(artists));
         given(artistRepository.count()).willReturn(Mono.just((long) 5));
 
 
@@ -108,20 +108,6 @@ class ArtistServiceImplTest extends ConcurrentTest {
             ArtistDTO expected = artistIterator.next().toDTO();
             assertEquals(expected, got);
         });
-    }
-
-    @Test
-    void getArtistsByPageAndSizeWithNullPageable() {
-        ArgumentCaptor<Pageable> captor = ArgumentCaptor.forClass(Pageable.class);
-
-        given(artistRepository.findAllByNameNotNull(captor.capture())).willReturn(Flux.empty());
-        given(artistRepository.count()).willReturn(Mono.just((long) 0));
-
-        Page<ArtistDTO> page = artistService.getArtists(null).block();
-
-        assertNotNull(page);
-        assertEquals(0, page.getTotalElements());
-        assertEquals(0, page.getTotalPages());
     }
 
     @Test

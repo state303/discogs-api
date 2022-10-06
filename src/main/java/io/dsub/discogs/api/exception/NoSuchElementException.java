@@ -4,8 +4,6 @@ public class NoSuchElementException extends BaseCheckedException {
     private static final String MESSAGE = "no such element";
     private static final NoSuchElementException INSTANCE = new NoSuchElementException();
 
-    public static NoSuchElementException getInstance() {return INSTANCE;}
-
     public NoSuchElementException() {
         super(MESSAGE);
     }
@@ -13,4 +11,6 @@ public class NoSuchElementException extends BaseCheckedException {
     public NoSuchElementException(Throwable cause) {
         super(MESSAGE, cause);
     }
+
+    public static NoSuchElementException getInstance() {return INSTANCE;}
 }

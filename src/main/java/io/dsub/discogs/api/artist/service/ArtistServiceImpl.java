@@ -10,14 +10,11 @@ import io.dsub.discogs.api.validator.Validator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.time.Duration;
-import java.util.ArrayList;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -28,6 +25,8 @@ public class ArtistServiceImpl implements ArtistService {
     private final ArtistRepository artistRepository;
 
     private final Validator validator;
+    private final Function<Artist, Mono<ArtistDTO>> toDTO = artist -> Mono.just(artist.toDTO());
+    private final Predicate<Integer> greaterThanZero = i -> i > 0;
 
     @Override
     public Mono<Page<ArtistDTO>> getArtists(Pageable pageable) {
@@ -42,15 +41,17 @@ public class ArtistServiceImpl implements ArtistService {
 
     @Override
     public Mono<ArtistDTO> saveOrUpdate(Create command) {
-        return validator.validate(command)
+        return validate(command)
                 .flatMap(artistRepository::saveOrUpdate)
                 .flatMap(toDTO);
     }
 
     @Override
     public Mono<ArtistDTO> update(int id, Update command) {
-        return artistRepository.findById(id)
-                .flatMap(artist -> updateArtistWithCommand(artist, command))
+        return validate(command)
+                .then(artistRepository.findById(id))
+                .flatMap(artist -> Mono.just(artist.withMutableDataFrom(command)))
+                .flatMap(artistRepository::save)
                 .flatMap(toDTO)
                 .switchIfEmpty(Mono.error(NoSuchElementException.getInstance()));
     }
@@ -68,14 +69,6 @@ public class ArtistServiceImpl implements ArtistService {
                 .flatMap(toDTO)
                 .switchIfEmpty(Mono.error(NoSuchElementException.getInstance()));
     }
-
-    private final Function<Artist, Mono<ArtistDTO>> toDTO = artist -> Mono.just(artist.toDTO());
-
-    private Mono<Artist> updateArtistWithCommand(Artist artist, Update command) {
-        return this.artistRepository.save(artist.withMutableDataFrom(command));
-    }
-
-    private final Predicate<Integer> greaterThanZero = i -> i > 0;
 
     public Mono<Long> count() {
         return artistRepository.count();

@@ -12,7 +12,9 @@ import reactor.core.publisher.Mono;
 public interface LabelService extends ValidatingService, PagingService {
     Flux<LabelDTO> getLabels();
     Mono<Page<LabelDTO>> getLabels(Pageable pageable);
-    Mono<LabelDTO> updateLabel(LabelCommand.Update command);
+    Mono<LabelDTO> updateLabel(Integer id, LabelCommand.Update command);
     Mono<LabelDTO> saveOrUpdate(LabelCommand.Create command);
     Mono<Void> deleteLabel(Integer id);
+
+    Mono<LabelDTO> findById(Integer id);
 }

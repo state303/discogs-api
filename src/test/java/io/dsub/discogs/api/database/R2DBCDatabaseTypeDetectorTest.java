@@ -2,19 +2,12 @@ package io.dsub.discogs.api.database;
 
 import io.dsub.discogs.api.exception.InvalidR2DBCConnectionUrlException;
 import io.dsub.discogs.api.exception.UnsupportedDatabaseException;
-import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ArgumentsSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
-import static org.junit.jupiter.api.Assertions.*;
 
 class R2DBCDatabaseTypeDetectorTest {
 
