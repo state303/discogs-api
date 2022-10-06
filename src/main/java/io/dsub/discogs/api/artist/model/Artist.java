@@ -7,7 +7,6 @@ import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
-import reactor.core.publisher.Mono;
 
 import javax.validation.constraints.NotBlank;
 
@@ -37,23 +36,23 @@ public class Artist extends BaseEntity<Integer> {
     @Column("data_quality")
     private String dataQuality;
 
-    public Artist withMutableDataFrom(ArtistCommand.Update that) {
+    public Artist withMutableDataFrom(ArtistCommand.Update command) {
         return Artist.builder()
                 .id(this.id)
-                .profile(that.getProfile())
-                .dataQuality(that.getDataQuality())
-                .realName(that.getRealName())
-                .name(that.getName())
+                .profile(command.getProfile())
+                .dataQuality(command.getDataQuality())
+                .realName(command.getRealName())
+                .name(command.getName())
                 .build();
     }
 
-    public Mono<ArtistDTO> toDTO() {
-        return Mono.just(ArtistDTO.builder()
+    public ArtistDTO toDTO() {
+        return ArtistDTO.builder()
                 .id(id)
                 .profile(profile)
                 .dataQuality(dataQuality)
                 .realName(realName)
                 .name(name)
-                .build());
+                .build();
     }
 }

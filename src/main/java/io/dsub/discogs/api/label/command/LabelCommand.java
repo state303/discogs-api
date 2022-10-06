@@ -1,37 +1,35 @@
-package io.dsub.discogs.api.artist.command;
+package io.dsub.discogs.api.label.command;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-public abstract class ArtistCommand {
+public final class LabelCommand {
     @Getter
-    @RequiredArgsConstructor
-    public static class Create extends ArtistCommand {
+    @AllArgsConstructor
+    public static class Create {
         @Min(0)
         @NotNull
         private final Integer id;
-        @Size(max = 1000)
+        @Size(max = 255)
         private final String name;
-        @Size(max = 2000)
-        private final String realName;
         private final String profile;
         @Size(max = 255)
         private final String dataQuality;
+        private final String contactInfo;
     }
 
     @Getter
-    @RequiredArgsConstructor
-    public static class Update extends ArtistCommand {
-        @Size(max = 1000)
+    @AllArgsConstructor
+    public static class Update {
+        @Size(max = 255)
         private final String name;
-        @Size(max = 2000)
-        private final String realName;
         private final String profile;
         @Size(max = 255)
         private final String dataQuality;
+        private final String contactInfo;
     }
 }

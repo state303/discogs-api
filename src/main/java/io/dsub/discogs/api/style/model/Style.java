@@ -31,7 +31,7 @@ public class Style extends BaseEntity<String> {
         return getName();
     }
 
-    public Mono<StyleDTO> toDTO() {
-        return Mono.just(new StyleDTO(getName()));
+    public StyleDTO toDTO() {
+        return new StyleDTO(getName());
     }
 }

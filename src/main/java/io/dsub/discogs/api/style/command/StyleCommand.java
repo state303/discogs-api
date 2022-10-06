@@ -8,23 +8,19 @@ import javax.validation.constraints.Size;
 
 public abstract class StyleCommand {
 
-    private StyleCommand(){}
-
-    public abstract String getName();
-
     @Getter
     @RequiredArgsConstructor
-    public static class Create {
+    public static class Create extends StyleCommand {
         @NotNull
-        @Size(min = 1, max = 255)
+        @Size(max = 255)
         private final String name;
     }
 
     @Getter
     @RequiredArgsConstructor
-    public static class Delete {
+    public static class Delete extends StyleCommand {
         @NotNull
-        @Size(min = 1, max = 255)
+        @Size(max = 255)
         private final String name;
     }
 }

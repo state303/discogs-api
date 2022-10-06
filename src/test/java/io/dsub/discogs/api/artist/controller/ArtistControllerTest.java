@@ -41,7 +41,7 @@ class ArtistControllerTest extends ConcurrentTest {
     void getArtistsByPageReturnsDelegatedResult() {
         Pageable pageable = PageRequest.of(3, 10);
         Page<ArtistDTO> expected = new PageImpl<>(List.of());
-        given(artistService.getArtistsByPageable(pageable)).willReturn(Mono.just(expected));
+        given(artistService.getArtists(pageable)).willReturn(Mono.just(expected));
 
         ResponseEntity<Mono<Page<ArtistDTO>>> response = artistController.getArtistsByPage(pageable);
 
@@ -54,17 +54,17 @@ class ArtistControllerTest extends ConcurrentTest {
         assertEquals(expected, got);
         assertEquals(expected.getTotalElements(), 0);
 
-        verify(artistService, times(1)).getArtistsByPageable(pageable);
+        verify(artistService, times(1)).getArtists(pageable);
     }
 
     @Test
     void getArtistByIdCallsService() {
         int id = TestUtil.getRandomIndexValue();
         Artist artist = TestUtil.getRandomArtist(id);
-        ArtistDTO expected = artist.toDTO().block();
+        ArtistDTO expected = artist.toDTO();
         assertNotNull(expected);
 
-        given(artistService.findById(id)).willReturn(artist.toDTO());
+        given(artistService.findById(id)).willReturn(Mono.just(artist.toDTO()));
         ResponseEntity<Mono<ArtistDTO>> response = artistController.getArtistById(id);
 
         Mono<ArtistDTO> responseDtoMono = response.getBody();
@@ -81,8 +81,8 @@ class ArtistControllerTest extends ConcurrentTest {
     void createArtistCallsService() {
         Artist artist = TestUtil.getRandomArtist();
         ArtistCommand.Create command = TestUtil.getCreateCommandFrom(artist);
-        ArtistDTO expected = artist.toDTO().block();
-        given(artistService.updateOrInsert(command)).willReturn(artist.toDTO());
+        ArtistDTO expected = artist.toDTO();
+        given(artistService.saveOrUpdate(command)).willReturn(Mono.just(artist.toDTO()));
 
         ResponseEntity<Mono<ArtistDTO>> responseEntity = artistController.createArtist(command);
         Mono<ArtistDTO> responseDTO = responseEntity.getBody();
@@ -91,7 +91,7 @@ class ArtistControllerTest extends ConcurrentTest {
         assertNotNull(got);
         assertEquals(expected, got);
 
-        verify(artistService, times(1)).updateOrInsert(command);
+        verify(artistService, times(1)).saveOrUpdate(command);
     }
 
     @Test
@@ -101,7 +101,7 @@ class ArtistControllerTest extends ConcurrentTest {
         Artist other = TestUtil.getRandomArtist(id);
 
         ArtistCommand.Update command = TestUtil.getUpdateCommandFrom(artist);
-        Mono<ArtistDTO> expectedMono = artist.withMutableDataFrom(command).toDTO();
+        Mono<ArtistDTO> expectedMono = Mono.just(artist.withMutableDataFrom(command).toDTO());
         given(artistService.update(id, command)).willReturn(expectedMono);
 
         ResponseEntity<Mono<ArtistDTO>> response = artistController.updateArtist(artist.getId(), command);

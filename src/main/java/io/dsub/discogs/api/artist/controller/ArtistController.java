@@ -28,7 +28,7 @@ public class ArtistController {
     @GetMapping(produces = "application/json")
     public ResponseEntity<Mono<Page<ArtistDTO>>> getArtistsByPage(
             final @PageableDefault(page = defaultPageIndex, size = defaultPageSize) Pageable page) {
-        return ResponseEntity.ok(artistService.getArtistsByPageable(page));
+        return ResponseEntity.ok(artistService.getArtists(page));
     }
 
     @GetMapping("/{id}")
@@ -38,7 +38,7 @@ public class ArtistController {
 
     @PostMapping
     public ResponseEntity<Mono<ArtistDTO>> createArtist(final @RequestBody Create command) {
-        return ResponseEntity.ok(artistService.updateOrInsert(command));
+        return ResponseEntity.ok(artistService.saveOrUpdate(command));
     }
 
     @PutMapping("/{id}")

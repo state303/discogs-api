@@ -6,12 +6,15 @@ import static io.dsub.discogs.api.artist.command.ArtistCommand.Create;
 import io.dsub.discogs.api.artist.dto.ArtistDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 public interface ArtistService {
-    Mono<Page<ArtistDTO>> getArtistsByPageable(Pageable pageable);
+    Mono<Page<ArtistDTO>> getArtists(Pageable pageable);
 
-    Mono<ArtistDTO> updateOrInsert(Create command);
+    Flux<ArtistDTO> getArtists();
+
+    Mono<ArtistDTO> saveOrUpdate(Create command);
 
     Mono<ArtistDTO> update(int id, Update command);
 

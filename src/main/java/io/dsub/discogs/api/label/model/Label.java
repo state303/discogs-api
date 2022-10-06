@@ -8,9 +8,6 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Size;
-
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Table(name = "label")
@@ -19,12 +16,9 @@ public class Label extends BaseEntity<Integer> {
     @Column("id")
     private Integer id;
 
-    @NotBlank
-    @Size(max = 255)
     @Column("name")
     private String name;
 
-    @Size(max = 255)
     @Column("data_quality")
     private String dataQuality;
 

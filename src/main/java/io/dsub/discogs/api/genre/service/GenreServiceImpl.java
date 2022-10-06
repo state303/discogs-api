@@ -14,6 +14,8 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.function.Function;
+
 @Service
 @RequiredArgsConstructor
 public class GenreServiceImpl implements GenreService {
@@ -23,14 +25,14 @@ public class GenreServiceImpl implements GenreService {
 
     @Override
     public Flux<GenreDTO> findAll() {
-        return genreRepository.findAll().flatMap(Genre::toDTO);
+        return genreRepository.findAll().flatMap(toDTO);
     }
 
     @Override
     public Mono<Page<GenreDTO>> findAll(Pageable pageable) {
         final Pageable notNullPageable = PageUtil.getOrDefaultPageable(pageable);
         return genreRepository.findAllByNameNotNullOrderByNameAsc(pageable)
-                .flatMap(Genre::toDTO)
+                .flatMap(toDTO)
                 .collectList()
                 .zipWith(genreRepository.count())
                 .map(tuple -> new PageImpl<>(tuple.getT1(), notNullPageable, tuple.getT2()));
@@ -39,8 +41,8 @@ public class GenreServiceImpl implements GenreService {
     @Override
     public Mono<GenreDTO> save(GenreCommand.Create command) {
         return validator.validate(command)
-                .flatMap(genreRepository::insert)
-                .flatMap(Genre::toDTO);
+                .flatMap(genreRepository::saveOrUpdate)
+                .flatMap(toDTO);
     }
 
     @Override
@@ -48,4 +50,6 @@ public class GenreServiceImpl implements GenreService {
         return validator.validate(command)
                 .flatMap(validatedCommand -> genreRepository.deleteById(validatedCommand.getName()));
     }
+
+    private final Function<Genre, Mono<GenreDTO>> toDTO = artist -> Mono.just(artist.toDTO());
 }

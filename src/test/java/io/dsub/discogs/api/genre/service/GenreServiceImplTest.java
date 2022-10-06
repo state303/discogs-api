@@ -19,12 +19,9 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -141,14 +138,14 @@ class GenreServiceImplTest extends ConcurrentTest {
         assertNotNull(dto);
 
         given(validator.validate(createCommand)).willReturn(Mono.just(createCommand));
-        given(genreRepository.insert(createCommand)).willReturn(Mono.just(genre));
+        given(genreRepository.saveOrUpdate(createCommand)).willReturn(Mono.just(genre));
 
         StepVerifier.create(genreService.save(createCommand))
                 .expectNext(dto)
                 .verifyComplete();
 
         verify(validator, times(1)).validate(createCommand);
-        verify(genreRepository, times(1)).insert(createCommand);
+        verify(genreRepository, times(1)).saveOrUpdate(createCommand);
     }
 
     @Test

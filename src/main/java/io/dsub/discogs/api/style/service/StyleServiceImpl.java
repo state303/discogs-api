@@ -14,6 +14,8 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.function.Function;
+
 
 @Service
 @RequiredArgsConstructor
@@ -24,14 +26,14 @@ public class StyleServiceImpl implements StyleService {
 
     @Override
     public Flux<StyleDTO> findAll() {
-        return styleRepository.findAll().flatMap(Style::toDTO);
+        return styleRepository.findAll().flatMap(toDTO);
     }
 
     @Override
     public Mono<Page<StyleDTO>> findAll(Pageable pageable) {
         final Pageable notNullPageable = PageUtil.getOrDefaultPageable(pageable);
         return styleRepository.findAllByNameNotNullOrderByNameAsc(pageable)
-                .flatMap(Style::toDTO)
+                .flatMap(toDTO)
                 .collectList()
                 .zipWith(styleRepository.count())
                 .map(tuple -> new PageImpl<>(tuple.getT1(), notNullPageable, tuple.getT2()));
@@ -41,7 +43,7 @@ public class StyleServiceImpl implements StyleService {
     public Mono<StyleDTO> save(StyleCommand.Create command) {
         return validator.validate(command)
                 .flatMap(styleRepository::insert)
-                .flatMap(Style::toDTO);
+                .flatMap(toDTO);
     }
 
     @Override
@@ -50,4 +52,6 @@ public class StyleServiceImpl implements StyleService {
                 .flatMap(validatedCommand -> Mono.just(validatedCommand.getName()))
                 .flatMap(styleRepository::deleteById);
     }
+
+    private final Function<Style, Mono<StyleDTO>> toDTO = style -> Mono.just(style.toDTO());
 }

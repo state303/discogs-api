@@ -31,7 +31,7 @@ public class Genre extends BaseEntity<String> {
         return getName();
     }
 
-    public Mono<GenreDTO> toDTO() {
-        return Mono.just(new GenreDTO(getName()));
+    public GenreDTO toDTO() {
+        return new GenreDTO(getName());
     }
 }

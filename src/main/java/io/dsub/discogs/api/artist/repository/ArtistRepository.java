@@ -22,7 +22,7 @@ public interface ArtistRepository extends R2dbcRepository<Artist, Integer> {
             "real_name=excluded.real_name " +
             "WHERE artist.id=excluded.id")
     // @formatter:on
-    Mono<Artist> insertOrUpdate(Create command);
+    Mono<Artist> saveOrUpdate(Create command);
 
     Flux<Artist> findAllByNameNotNullOrderByNameAscIdAsc(final Pageable page);
 }

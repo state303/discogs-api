@@ -14,9 +14,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 @Slf4j
 @Service
@@ -27,49 +29,54 @@ public class ArtistServiceImpl implements ArtistService {
     private final ReactiveValidator validator;
 
     @Override
-    public Mono<Page<ArtistDTO>> getArtistsByPageable(Pageable pageable) {
+    public Mono<Page<ArtistDTO>> getArtists(Pageable pageable) {
         final Pageable notNullPageable = PageUtil.getOrDefaultPageable(pageable);
         return artistRepository.findAllByNameNotNullOrderByNameAscIdAsc(notNullPageable)
-                .flatMap(Artist::toDTO)
+                .flatMap(toDTO)
                 .collectList()
                 .zipWith(artistRepository.count())
                 .map(tuple -> new PageImpl<>(tuple.getT1(), notNullPageable, tuple.getT2()));
     }
 
     @Override
-    public Mono<ArtistDTO> updateOrInsert(Create command) {
+    public Flux<ArtistDTO> getArtists() {
+        return artistRepository.findAll().flatMap(toDTO);
+    }
+
+    @Override
+    public Mono<ArtistDTO> saveOrUpdate(Create command) {
         return validator.validate(command)
-                .flatMap(artistRepository::insertOrUpdate)
-                .flatMap(mapToDTO());
+                .flatMap(artistRepository::saveOrUpdate)
+                .flatMap(toDTO);
     }
 
     @Override
     public Mono<ArtistDTO> update(int id, Update command) {
         return artistRepository.findById(id)
-                .flatMap(artist -> saveArtistAfterUpdate(artist, command))
-                .flatMap(mapToDTO())
+                .flatMap(artist -> updateArtistWithCommand(artist, command))
+                .flatMap(toDTO)
                 .switchIfEmpty(Mono.error(NoSuchElementException.getInstance()));
     }
 
     @Override
     public Mono<Void> delete(int id) {
         return Mono.just(id)
-                .filter(i -> i > 0)
+                .filter(greaterThanZero)
                 .flatMap(artistRepository::deleteById);
     }
 
     @Override
     public Mono<ArtistDTO> findById(int id) {
         return artistRepository.findById(id)
-                .flatMap(mapToDTO())
+                .flatMap(toDTO)
                 .switchIfEmpty(Mono.error(NoSuchElementException.getInstance()));
     }
 
-    private Function<Artist, Mono<ArtistDTO>> mapToDTO() {
-        return Artist::toDTO;
-    }
+    private final Function<Artist, Mono<ArtistDTO>> toDTO = artist -> Mono.just(artist.toDTO());
 
-    private Mono<Artist> saveArtistAfterUpdate(Artist artist, Update command) {
+    private Mono<Artist> updateArtistWithCommand(Artist artist, Update command) {
         return this.artistRepository.save(artist.withMutableDataFrom(command));
     }
+
+    private final Predicate<Integer> greaterThanZero = i -> i > 0;
 }

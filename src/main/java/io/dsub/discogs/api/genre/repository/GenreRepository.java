@@ -14,7 +14,7 @@ public interface GenreRepository extends R2dbcRepository<Genre, String> {
     @Query("INSERT INTO genre(name, created_at, last_modified_at) " +
             "VALUES (:#{[0].name}, now(), now()) " +
             "ON CONFLICT (name) DO NOTHING")
-    Mono<Genre> insert(GenreCommand.Create command);
+    Mono<Genre> saveOrUpdate(GenreCommand.Create command);
 
     Flux<Genre> findAllByNameNotNullOrderByNameAsc(final Pageable page);
 }
