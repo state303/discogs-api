@@ -11,7 +11,6 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import javax.validation.ConstraintViolation;
-import javax.validation.Validator;
 
 import java.util.Set;
 
@@ -19,16 +18,16 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 
-class ReactiveValidatorImplTest extends ConcurrentTest {
+class DelegatingReactiveValidatorImplTest extends ConcurrentTest {
     @Mock
-    Validator validator;
+    javax.validation.Validator validator;
 
-    ReactiveValidator reactiveValidator;
+    Validator reactiveValidator;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        this.reactiveValidator = new ReactiveValidatorImpl(validator);
+        this.reactiveValidator = new ValidatorImpl(validator);
     }
 
     @Test

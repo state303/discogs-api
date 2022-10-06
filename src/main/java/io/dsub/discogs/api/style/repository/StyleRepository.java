@@ -16,6 +16,4 @@ public interface StyleRepository extends R2dbcRepository<Style, String> {
             "VALUES (:#{[0].name}, now(), now()) " +
             "ON CONFLICT (name) DO NOTHING")
     Mono<Style> insert(StyleCommand.Create command);
-
-    Flux<Style> findAllByNameNotNullOrderByNameAsc(final Pageable page);
 }

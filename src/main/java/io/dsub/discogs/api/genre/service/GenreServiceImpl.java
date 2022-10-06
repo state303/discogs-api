@@ -4,11 +4,10 @@ import io.dsub.discogs.api.genre.command.GenreCommand;
 import io.dsub.discogs.api.genre.dto.GenreDTO;
 import io.dsub.discogs.api.genre.model.Genre;
 import io.dsub.discogs.api.genre.repository.GenreRepository;
-import io.dsub.discogs.api.util.PageUtil;
-import io.dsub.discogs.api.validator.ReactiveValidator;
+import io.dsub.discogs.api.service.PagingService;
+import io.dsub.discogs.api.validator.Validator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -21,7 +20,7 @@ import java.util.function.Function;
 public class GenreServiceImpl implements GenreService {
 
     private final GenreRepository genreRepository;
-    private final ReactiveValidator validator;
+    private final Validator validator;
 
     @Override
     public Flux<GenreDTO> findAll() {
@@ -30,26 +29,33 @@ public class GenreServiceImpl implements GenreService {
 
     @Override
     public Mono<Page<GenreDTO>> findAll(Pageable pageable) {
-        final Pageable notNullPageable = PageUtil.getOrDefaultPageable(pageable);
-        return genreRepository.findAllByNameNotNullOrderByNameAsc(pageable)
-                .flatMap(toDTO)
-                .collectList()
-                .zipWith(genreRepository.count())
-                .map(tuple -> new PageImpl<>(tuple.getT1(), notNullPageable, tuple.getT2()));
+        Flux<GenreDTO> sortedDTO = genreRepository.findAll(pageable.getSort()).flatMap(toDTO);
+        return getPagedResult(count(), pageable, sortedDTO);
     }
 
     @Override
     public Mono<GenreDTO> save(GenreCommand.Create command) {
-        return validator.validate(command)
+        return validate(command)
                 .flatMap(genreRepository::saveOrUpdate)
                 .flatMap(toDTO);
     }
-
     @Override
     public Mono<Void> delete(GenreCommand.Delete command) {
-        return validator.validate(command)
-                .flatMap(validatedCommand -> genreRepository.deleteById(validatedCommand.getName()));
+        return validate(command).flatMap(validated -> deleteGenreByName(validated.getName()));
+    }
+
+    public Mono<Long> count() {
+        return this.genreRepository.count();
+    }
+
+    private Mono<Void> deleteGenreByName(String name) {
+        return genreRepository.deleteById(name);
     }
 
     private final Function<Genre, Mono<GenreDTO>> toDTO = artist -> Mono.just(artist.toDTO());
+
+    @Override
+    public <T> Mono<T> validate(T item) {
+        return this.validator.validate(item);
+    }
 }

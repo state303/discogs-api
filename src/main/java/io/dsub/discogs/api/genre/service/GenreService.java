@@ -2,12 +2,14 @@ package io.dsub.discogs.api.genre.service;
 
 import io.dsub.discogs.api.genre.command.GenreCommand;
 import io.dsub.discogs.api.genre.dto.GenreDTO;
+import io.dsub.discogs.api.service.PagingService;
+import io.dsub.discogs.api.service.ValidatingService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-public interface GenreService {
+public interface GenreService extends ValidatingService, PagingService {
 
     Flux<GenreDTO> findAll();
 

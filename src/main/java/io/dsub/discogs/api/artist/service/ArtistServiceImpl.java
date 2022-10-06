@@ -6,8 +6,7 @@ import io.dsub.discogs.api.artist.dto.ArtistDTO;
 import io.dsub.discogs.api.artist.model.Artist;
 import io.dsub.discogs.api.artist.repository.ArtistRepository;
 import io.dsub.discogs.api.exception.NoSuchElementException;
-import io.dsub.discogs.api.util.PageUtil;
-import io.dsub.discogs.api.validator.ReactiveValidator;
+import io.dsub.discogs.api.validator.Validator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -17,6 +16,8 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.Duration;
+import java.util.ArrayList;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -26,16 +27,12 @@ import java.util.function.Predicate;
 public class ArtistServiceImpl implements ArtistService {
     private final ArtistRepository artistRepository;
 
-    private final ReactiveValidator validator;
+    private final Validator validator;
 
     @Override
     public Mono<Page<ArtistDTO>> getArtists(Pageable pageable) {
-        final Pageable notNullPageable = PageUtil.getOrDefaultPageable(pageable);
-        return artistRepository.findAllByNameNotNullOrderByNameAscIdAsc(notNullPageable)
-                .flatMap(toDTO)
-                .collectList()
-                .zipWith(artistRepository.count())
-                .map(tuple -> new PageImpl<>(tuple.getT1(), notNullPageable, tuple.getT2()));
+        Flux<ArtistDTO> sortedDTOs =  artistRepository.findAll(pageable.getSort()).flatMap(toDTO);
+        return getPagedResult(count(), pageable, sortedDTOs);
     }
 
     @Override
@@ -79,4 +76,13 @@ public class ArtistServiceImpl implements ArtistService {
     }
 
     private final Predicate<Integer> greaterThanZero = i -> i > 0;
+
+    public Mono<Long> count() {
+        return artistRepository.count();
+    }
+
+    @Override
+    public <T> Mono<T> validate(T item) {
+        return validator.validate(item);
+    }
 }

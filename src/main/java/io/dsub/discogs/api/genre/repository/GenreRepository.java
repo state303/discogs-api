@@ -15,6 +15,4 @@ public interface GenreRepository extends R2dbcRepository<Genre, String> {
             "VALUES (:#{[0].name}, now(), now()) " +
             "ON CONFLICT (name) DO NOTHING")
     Mono<Genre> saveOrUpdate(GenreCommand.Create command);
-
-    Flux<Genre> findAllByNameNotNullOrderByNameAsc(final Pageable page);
 }

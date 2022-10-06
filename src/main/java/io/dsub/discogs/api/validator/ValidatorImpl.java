@@ -4,15 +4,14 @@ import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
 
 import javax.validation.ConstraintViolationException;
-import javax.validation.Validator;
 
 @RequiredArgsConstructor
-public class ReactiveValidatorImpl implements ReactiveValidator {
-    private final Validator validator;
+public class ValidatorImpl implements Validator {
 
-    @Override
-    public <T> Mono<T> validate(T object, Class<?>... groups) {
-        return Mono.just(validator.validate(object, groups))
+    private final javax.validation.Validator delegate;
+
+    public <T> Mono<T> validate(T object) {
+        return Mono.just(delegate.validate(object))
                 .flatMap(violations -> {
                     if (violations.isEmpty()) {
                         return Mono.just(object);

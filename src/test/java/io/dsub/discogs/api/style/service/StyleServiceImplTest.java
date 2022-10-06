@@ -6,7 +6,7 @@ import io.dsub.discogs.api.style.model.Style;
 import io.dsub.discogs.api.style.repository.StyleRepository;
 import io.dsub.discogs.api.test.ConcurrentTest;
 import io.dsub.discogs.api.test.util.TestUtil;
-import io.dsub.discogs.api.validator.ReactiveValidator;
+import io.dsub.discogs.api.validator.Validator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -34,7 +34,7 @@ class StyleServiceImplTest extends ConcurrentTest {
     StyleRepository styleRepository;
 
     @Mock
-    ReactiveValidator validator;
+    Validator validator;
 
     StyleServiceImpl styleService;
 
@@ -77,7 +77,7 @@ class StyleServiceImplTest extends ConcurrentTest {
         ArgumentCaptor<Pageable> captor = ArgumentCaptor.forClass(Pageable.class);
         Pageable pageable = PageRequest.of(0, size);
 
-        given(styleRepository.findAllByNameNotNullOrderByNameAsc(captor.capture())).willReturn(styleFlux);
+        given(styleRepository.findAllByNameNotNull(captor.capture())).willReturn(styleFlux);
         given(styleRepository.count()).willReturn(Mono.just((long) size));
 
         Mono<Page<StyleDTO>> result = styleService.findAll(pageable);
@@ -88,7 +88,7 @@ class StyleServiceImplTest extends ConcurrentTest {
         assertEquals(size, page.getTotalElements());
         assertEquals(1, page.getTotalPages());
 
-        verify(styleRepository, times(1)).findAllByNameNotNullOrderByNameAsc(pageable);
+        verify(styleRepository, times(1)).findAllByNameNotNull(pageable);
         assertEquals(pageable, captor.getValue());
     }
 
@@ -98,7 +98,7 @@ class StyleServiceImplTest extends ConcurrentTest {
         final Pageable pageable = PageRequest.of(0, 1);
 
         ArgumentCaptor<Pageable> captor = ArgumentCaptor.forClass(Pageable.class);
-        given(styleRepository.findAllByNameNotNullOrderByNameAsc(captor.capture())).willReturn(emptyStyleFlux);
+        given(styleRepository.findAllByNameNotNull(captor.capture())).willReturn(emptyStyleFlux);
         given(styleRepository.count()).willReturn(Mono.just((long) 0));
 
         final Mono<Page<StyleDTO>> result = styleService.findAll(pageable);
@@ -108,7 +108,7 @@ class StyleServiceImplTest extends ConcurrentTest {
 
         assertEquals(0, page.getTotalPages());
         assertEquals(0, page.getTotalElements());
-        verify(styleRepository, times(1)).findAllByNameNotNullOrderByNameAsc(pageable);
+        verify(styleRepository, times(1)).findAllByNameNotNull(pageable);
         assertEquals(pageable, captor.getValue());
     }
 

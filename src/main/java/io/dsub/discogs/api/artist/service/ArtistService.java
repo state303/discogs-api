@@ -4,12 +4,14 @@ import static io.dsub.discogs.api.artist.command.ArtistCommand.Update;
 import static io.dsub.discogs.api.artist.command.ArtistCommand.Create;
 
 import io.dsub.discogs.api.artist.dto.ArtistDTO;
+import io.dsub.discogs.api.service.PagingService;
+import io.dsub.discogs.api.service.ValidatingService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-public interface ArtistService {
+public interface ArtistService extends ValidatingService, PagingService {
     Mono<Page<ArtistDTO>> getArtists(Pageable pageable);
 
     Flux<ArtistDTO> getArtists();

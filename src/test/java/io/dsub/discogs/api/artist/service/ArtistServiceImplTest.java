@@ -5,9 +5,8 @@ import io.dsub.discogs.api.artist.model.Artist;
 import io.dsub.discogs.api.artist.repository.ArtistRepository;
 import io.dsub.discogs.api.test.ConcurrentTest;
 import io.dsub.discogs.api.test.util.TestUtil;
-import io.dsub.discogs.api.util.PageUtil;
-import io.dsub.discogs.api.validator.ReactiveValidator;
-import io.dsub.discogs.api.validator.ReactiveValidatorImpl;
+import io.dsub.discogs.api.validator.Validator;
+import io.dsub.discogs.api.validator.ValidatorImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -41,14 +40,14 @@ class ArtistServiceImplTest extends ConcurrentTest {
     @Mock
     ArtistRepository artistRepository;
 
-    ReactiveValidator validator;
+    Validator validator;
 
     ArtistService artistService;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        validator = Mockito.spy(new ReactiveValidatorImpl(TestUtil.getNoOpValidator()));
+        validator = Mockito.spy(new ValidatorImpl(TestUtil.getNoOpValidator()));
         this.artistService = new ArtistServiceImpl(artistRepository, validator);
     }
 
@@ -77,7 +76,7 @@ class ArtistServiceImplTest extends ConcurrentTest {
     @Test
     void getArtistsByPageAndSizeWithNoArtists() {
         Pageable pageRequest = PageRequest.of(0, 5);
-        given(artistRepository.findAllByNameNotNullOrderByNameAscIdAsc(pageRequest)).willReturn(Flux.empty());
+        given(artistRepository.findAllByNameNotNull(pageRequest)).willReturn(Flux.empty());
         given(artistRepository.count()).willReturn(Mono.just((long) 0));
 
         Page<ArtistDTO> page = artistService.getArtists(pageRequest).block();
@@ -94,7 +93,7 @@ class ArtistServiceImplTest extends ConcurrentTest {
 
         assertNotNull(artists);
 
-        given(artistRepository.findAllByNameNotNullOrderByNameAscIdAsc(pageRequest)).willReturn(Flux.fromIterable(artists));
+        given(artistRepository.findAllByNameNotNull(pageRequest)).willReturn(Flux.fromIterable(artists));
         given(artistRepository.count()).willReturn(Mono.just((long) 5));
 
 
@@ -115,7 +114,7 @@ class ArtistServiceImplTest extends ConcurrentTest {
     void getArtistsByPageAndSizeWithNullPageable() {
         ArgumentCaptor<Pageable> captor = ArgumentCaptor.forClass(Pageable.class);
 
-        given(artistRepository.findAllByNameNotNullOrderByNameAscIdAsc(captor.capture())).willReturn(Flux.empty());
+        given(artistRepository.findAllByNameNotNull(captor.capture())).willReturn(Flux.empty());
         given(artistRepository.count()).willReturn(Mono.just((long) 0));
 
         Page<ArtistDTO> page = artistService.getArtists(null).block();
@@ -123,10 +122,6 @@ class ArtistServiceImplTest extends ConcurrentTest {
         assertNotNull(page);
         assertEquals(0, page.getTotalElements());
         assertEquals(0, page.getTotalPages());
-
-        Pageable got = captor.getValue();
-        Pageable expected = PageUtil.getOrDefaultPageable(null);
-        assertEquals(expected, got);
     }
 
     @Test

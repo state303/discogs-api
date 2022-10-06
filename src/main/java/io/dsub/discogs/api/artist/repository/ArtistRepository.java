@@ -23,6 +23,4 @@ public interface ArtistRepository extends R2dbcRepository<Artist, Integer> {
             "WHERE artist.id=excluded.id")
     // @formatter:on
     Mono<Artist> saveOrUpdate(Create command);
-
-    Flux<Artist> findAllByNameNotNullOrderByNameAscIdAsc(final Pageable page);
 }

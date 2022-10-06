@@ -6,7 +6,7 @@ import io.dsub.discogs.api.genre.model.Genre;
 import io.dsub.discogs.api.genre.repository.GenreRepository;
 import io.dsub.discogs.api.test.ConcurrentTest;
 import io.dsub.discogs.api.test.util.TestUtil;
-import io.dsub.discogs.api.validator.ReactiveValidator;
+import io.dsub.discogs.api.validator.Validator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -34,7 +34,7 @@ class GenreServiceImplTest extends ConcurrentTest {
     GenreRepository genreRepository;
 
     @Mock
-    ReactiveValidator validator;
+    Validator validator;
 
     GenreServiceImpl genreService;
 
