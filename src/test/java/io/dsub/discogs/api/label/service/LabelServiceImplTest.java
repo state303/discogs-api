@@ -41,7 +41,7 @@ class LabelServiceImplTest extends ConcurrentTest {
     }
 
     @Test
-    void getLabels_ReturnsExact_FromLabelRepository() {
+    void getLabelsReturnsExact_FromLabelRepository() {
         List<Label> labels = getLabels(10);
         given(labelRepository.findAll()).willReturn(Flux.fromIterable(labels));
         LabelDTO[] expected = arrayFromCollection(labels);
@@ -52,14 +52,14 @@ class LabelServiceImplTest extends ConcurrentTest {
     }
 
     @Test
-    void getLabels_ReturnsEmptyFlux() {
+    void getLabelsReturnsEmptyFlux() {
         given(labelRepository.findAll()).willReturn(Flux.empty());
         StepVerifier.create(labelService.getLabels()).verifyComplete();
         verify(labelRepository, times(1)).findAll();
     }
 
     @Test
-    void getLabels_CallsRepository_WithPageable() {
+    void getLabelsCallsRepository_WithPageable() {
         Pageable pageable = PageRequest.of(0, 10);
         List<Label> labels = getLabels(10).stream().toList();
         List<LabelDTO> expectedContent = labels.stream().map(Label::toDTO).toList();
@@ -76,7 +76,7 @@ class LabelServiceImplTest extends ConcurrentTest {
     }
 
     @Test
-    void updateLabel_ValidatesCommand_ReturnsError() {
+    void updateLabelValidatesCommand_ReturnsError() {
         LabelCommand.Update command = Mockito.mock(LabelCommand.Update.class);
         given(validator.validate(command)).willReturn(Mono.empty());
 
@@ -88,7 +88,7 @@ class LabelServiceImplTest extends ConcurrentTest {
     }
 
     @Test
-    void updateLabel_MissingItem_ReturnsError() {
+    void updateLabelMissingItem_ReturnsError() {
         int id = TestUtil.getRandomIndexValue();
         var otherLabel = spy(randomLabel(id));
         var command = spy(getUpdateCommandFrom(otherLabel));
@@ -104,7 +104,7 @@ class LabelServiceImplTest extends ConcurrentTest {
     }
 
     @Test
-    void updateLabel_ReturnsDTO() {
+    void updateLabelReturnsDTO() {
         var label = randomLabel(10);
         var dto = label.toDTO();
         var command = getUpdateCommandFrom(label);
@@ -122,7 +122,7 @@ class LabelServiceImplTest extends ConcurrentTest {
     }
 
     @Test
-    void saveOrUpdate_ReturnsDTO() {
+    void saveOrUpdateReturnsDTO() {
         var label = randomLabel(5);
         var dto = label.toDTO();
         var command = getCreateCommandFrom(label);
@@ -140,7 +140,7 @@ class LabelServiceImplTest extends ConcurrentTest {
     }
 
     @Test
-    void deleteLabel_CallsRepository() {
+    void deleteLabelCallsRepository() {
         int id = TestUtil.getRandomIndexValue();
         given(labelRepository.deleteById(id)).willReturn(Mono.empty());
         StepVerifier.create(labelService.deleteLabel(id)).verifyComplete();
@@ -148,7 +148,7 @@ class LabelServiceImplTest extends ConcurrentTest {
     }
 
     @Test
-    void findById_ReturnsError() {
+    void findByIdReturnsError() {
         int id = TestUtil.getRandomIndexValue();
         given(labelRepository.findById(id)).willReturn(Mono.empty());
         StepVerifier.create(labelService.findById(id))
@@ -157,7 +157,7 @@ class LabelServiceImplTest extends ConcurrentTest {
     }
 
     @Test
-    void findById_ReturnsItem() {
+    void findByIdReturnsItem() {
         int id = TestUtil.getRandomIndexValue();
         Label label = randomLabel(id);
         given(labelRepository.findById(id)).willReturn(Mono.just(label));
