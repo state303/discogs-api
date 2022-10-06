@@ -1,6 +1,6 @@
 package io.dsub.discogs.api.label.service;
 
-import io.dsub.discogs.api.exception.NoSuchElementException;
+import io.dsub.discogs.api.exception.ItemNotFoundException;
 import io.dsub.discogs.api.label.command.LabelCommand;
 import io.dsub.discogs.api.label.dto.LabelDTO;
 import io.dsub.discogs.api.label.model.Label;
@@ -81,7 +81,7 @@ class LabelServiceImplTest extends ConcurrentTest {
         given(validator.validate(command)).willReturn(Mono.empty());
 
         StepVerifier.create(labelService.updateLabel(10, command))
-                        .verifyError(NoSuchElementException.class);
+                        .verifyError(ItemNotFoundException.class);
 
         verify(validator, times(1)).validate(command);
         verifyNoInteractions(labelRepository);
@@ -97,7 +97,7 @@ class LabelServiceImplTest extends ConcurrentTest {
         given(labelRepository.findById(id)).willReturn(Mono.empty());
 
         StepVerifier.create(labelService.updateLabel(id, command))
-                        .verifyError(NoSuchElementException.class);
+                        .verifyError(ItemNotFoundException.class);
 
         verify(validator, times(1)).validate(command);
         verify(labelRepository, times(1)).findById(id);
@@ -152,7 +152,7 @@ class LabelServiceImplTest extends ConcurrentTest {
         int id = TestUtil.getRandomIndexValue();
         given(labelRepository.findById(id)).willReturn(Mono.empty());
         StepVerifier.create(labelService.findById(id))
-                .verifyError(NoSuchElementException.class);
+                .verifyError(ItemNotFoundException.class);
         verify(labelRepository, times(1)).findById(id);
     }
 

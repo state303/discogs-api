@@ -11,7 +11,7 @@ import javax.validation.ValidationException;
 @Slf4j
 @ControllerAdvice
 public class ValidationExceptionHandler {
-    @ExceptionHandler({IllegalArgumentException.class, NoSuchElementException.class, ValidationException.class})
+    @ExceptionHandler({IllegalArgumentException.class, ItemNotFoundException.class, ValidationException.class})
     public ResponseEntity<?> handleException(Exception e) {
         return ResponseEntity.badRequest().body(e.getLocalizedMessage());
     }

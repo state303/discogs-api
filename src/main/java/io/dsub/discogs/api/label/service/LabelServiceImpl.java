@@ -1,6 +1,6 @@
 package io.dsub.discogs.api.label.service;
 
-import io.dsub.discogs.api.exception.NoSuchElementException;
+import io.dsub.discogs.api.exception.ItemNotFoundException;
 import io.dsub.discogs.api.label.command.LabelCommand;
 import io.dsub.discogs.api.label.dto.LabelDTO;
 import io.dsub.discogs.api.label.model.Label;
@@ -41,7 +41,7 @@ public class LabelServiceImpl implements LabelService {
                 .flatMap(label -> Mono.just(label.withMutableDataFrom(command)))
                 .flatMap(labelRepository::save)
                 .flatMap(toDTO)
-                .switchIfEmpty(Mono.error(NoSuchElementException.getInstance()));
+                .switchIfEmpty(Mono.error(ItemNotFoundException.getInstance()));
     }
 
     @Override
@@ -61,7 +61,7 @@ public class LabelServiceImpl implements LabelService {
         return labelRepository
                 .findById(id)
                 .flatMap(toDTO)
-                .switchIfEmpty(Mono.error(NoSuchElementException.getInstance()));
+                .switchIfEmpty(Mono.error(ItemNotFoundException.getInstance()));
     }
 
     private Mono<Long> count() {

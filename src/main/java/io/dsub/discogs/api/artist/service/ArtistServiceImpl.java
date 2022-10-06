@@ -5,7 +5,7 @@ import io.dsub.discogs.api.artist.command.ArtistCommand.Update;
 import io.dsub.discogs.api.artist.dto.ArtistDTO;
 import io.dsub.discogs.api.artist.model.Artist;
 import io.dsub.discogs.api.artist.repository.ArtistRepository;
-import io.dsub.discogs.api.exception.NoSuchElementException;
+import io.dsub.discogs.api.exception.ItemNotFoundException;
 import io.dsub.discogs.api.validator.Validator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -53,7 +53,7 @@ public class ArtistServiceImpl implements ArtistService {
                 .flatMap(artist -> Mono.just(artist.withMutableDataFrom(command)))
                 .flatMap(artistRepository::save)
                 .flatMap(toDTO)
-                .switchIfEmpty(Mono.error(NoSuchElementException.getInstance()));
+                .switchIfEmpty(Mono.error(ItemNotFoundException.getInstance()));
     }
 
     @Override
@@ -67,7 +67,7 @@ public class ArtistServiceImpl implements ArtistService {
     public Mono<ArtistDTO> findById(int id) {
         return artistRepository.findById(id)
                 .flatMap(toDTO)
-                .switchIfEmpty(Mono.error(NoSuchElementException.getInstance()));
+                .switchIfEmpty(Mono.error(ItemNotFoundException.getInstance()));
     }
 
     public Mono<Long> count() {
