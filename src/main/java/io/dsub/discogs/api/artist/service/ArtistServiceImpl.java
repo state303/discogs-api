@@ -5,7 +5,7 @@ import io.dsub.discogs.api.artist.command.ArtistCommand.Update;
 import io.dsub.discogs.api.artist.dto.ArtistDTO;
 import io.dsub.discogs.api.artist.model.Artist;
 import io.dsub.discogs.api.artist.repository.ArtistRepository;
-import io.dsub.discogs.api.exception.ItemNotFoundException;
+import io.dsub.discogs.api.core.exception.ItemNotFoundException;
 import io.dsub.discogs.api.validator.Validator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,7 +26,7 @@ public class ArtistServiceImpl implements ArtistService {
 
     private final Validator validator;
     private final Function<Artist, Mono<ArtistDTO>> toDTO = artist -> Mono.just(artist.toDTO());
-    private final Predicate<Integer> greaterThanZero = i -> i > 0;
+    private final Predicate<Long> greaterThanZero = i -> i > 0;
 
     @Override
     public Mono<Page<ArtistDTO>> getArtists(Pageable pageable) {
@@ -47,7 +47,7 @@ public class ArtistServiceImpl implements ArtistService {
     }
 
     @Override
-    public Mono<ArtistDTO> update(int id, Update command) {
+    public Mono<ArtistDTO> update(long id, Update command) {
         return validate(command)
                 .then(artistRepository.findById(id))
                 .flatMap(artist -> Mono.just(artist.withMutableDataFrom(command)))
@@ -57,14 +57,14 @@ public class ArtistServiceImpl implements ArtistService {
     }
 
     @Override
-    public Mono<Void> delete(int id) {
+    public Mono<Void> delete(long id) {
         return Mono.just(id)
                 .filter(greaterThanZero)
                 .flatMap(artistRepository::deleteById);
     }
 
     @Override
-    public Mono<ArtistDTO> findById(int id) {
+    public Mono<ArtistDTO> findById(long id) {
         return artistRepository.findById(id)
                 .flatMap(toDTO)
                 .switchIfEmpty(Mono.error(ItemNotFoundException.getInstance()));

@@ -1,6 +1,6 @@
 package io.dsub.discogs.api.database;
 
-import io.dsub.discogs.api.exception.UnsupportedDatabaseException;
+import io.dsub.discogs.api.core.exception.UnsupportedDatabaseException;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;

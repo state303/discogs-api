@@ -13,7 +13,7 @@ public abstract class ArtistCommand {
     public static class Create extends ArtistCommand {
         @Min(0)
         @NotNull
-        private final Integer id;
+        private final Long id;
         @Size(max = 1000)
         private final String name;
         @Size(max = 2000)

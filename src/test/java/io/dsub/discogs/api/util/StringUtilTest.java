@@ -1,5 +1,6 @@
 package io.dsub.discogs.api.util;
 
+import io.dsub.discogs.api.core.util.StringUtil;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
 

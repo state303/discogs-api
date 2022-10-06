@@ -1,8 +1,8 @@
 package io.dsub.discogs.api.artist.service;
 
 import io.dsub.discogs.api.artist.dto.ArtistDTO;
-import io.dsub.discogs.api.service.PagingService;
-import io.dsub.discogs.api.service.ValidatingService;
+import io.dsub.discogs.api.core.service.PagingService;
+import io.dsub.discogs.api.core.service.ValidatingService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import reactor.core.publisher.Flux;
@@ -18,9 +18,9 @@ public interface ArtistService extends ValidatingService, PagingService {
 
     Mono<ArtistDTO> saveOrUpdate(Create command);
 
-    Mono<ArtistDTO> update(int id, Update command);
+    Mono<ArtistDTO> update(long id, Update command);
 
-    Mono<Void> delete(int id);
+    Mono<Void> delete(long id);
 
-    Mono<ArtistDTO> findById(int id);
+    Mono<ArtistDTO> findById(long id);
 }

@@ -1,6 +1,6 @@
 package io.dsub.discogs.api.database;
 
-import io.dsub.discogs.api.exception.UnsupportedDatabaseException;
+import io.dsub.discogs.api.core.exception.UnsupportedDatabaseException;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.io.Resource;
 

@@ -138,7 +138,7 @@ class ArtistServiceImplTest extends ConcurrentTest {
     @Test
     void insertOrUpdateThrowsIfMissingName() {
         Create command =
-                new Create(3, null, null, null, null);
+                new Create(3L, null, null, null, null);
 
         String error = "test error message";
 
@@ -174,9 +174,8 @@ class ArtistServiceImplTest extends ConcurrentTest {
 
     @Test
     void updateCallsRepositoryUpdate() {
-        int id = TestUtil.getRandomIndexValue();
+        long id = TestUtil.getRandomIndexValue();
         Artist artist = TestUtil.getRandomArtist(id);
-        ArtistDTO dto = artist.toDTO();
         Update cmd = new Update("a", "b", "c", "d");
 
         given(artistRepository.findById(id))
@@ -196,8 +195,8 @@ class ArtistServiceImplTest extends ConcurrentTest {
 
     @Test
     void deleteCallsRepositoryWithSameID() {
-        int id = TestUtil.getRandomIndexValue();
-        ArgumentCaptor<Integer> idCaptor = ArgumentCaptor.forClass(Integer.class);
+        long id = TestUtil.getRandomIndexValue();
+        var idCaptor = ArgumentCaptor.forClass(Long.class);
         given(artistRepository.deleteById(idCaptor.capture())).willReturn(Mono.empty());
         StepVerifier.create(artistService.delete(id)).verifyComplete();
         assertEquals(id, idCaptor.getValue());
@@ -207,17 +206,17 @@ class ArtistServiceImplTest extends ConcurrentTest {
     @ParameterizedTest
     @ValueSource(ints = {-1, 0})
     void deleteNotCallsRepositoryDeleteWithZeroOrNegative(int value) {
-        given(artistRepository.deleteById(any(Integer.class))).willReturn(Mono.empty());
+        given(artistRepository.deleteById(any(Long.class))).willReturn(Mono.empty());
         StepVerifier.create(artistService.delete(value)).verifyComplete();
         verifyNoInteractions(artistRepository);
     }
 
     @Test
     void findByIdReturnsValidItem() {
-        int id = TestUtil.getRandomIndexValue();
+        long id = TestUtil.getRandomIndexValue();
         Artist artist = TestUtil.getRandomArtist(id);
 
-        ArgumentCaptor<Integer> captor = ArgumentCaptor.forClass(Integer.class);
+        var captor = ArgumentCaptor.forClass(Long.class);
         given(artistRepository.findById(captor.capture())).willReturn(Mono.just(artist));
 
         ArtistDTO got = artistService.findById(id).block();
@@ -228,7 +227,7 @@ class ArtistServiceImplTest extends ConcurrentTest {
         assertEquals(artist.getId(), captor.getValue());
     }
 
-    private Map<Integer, Artist> getArtistsByMap() {
+    private Map<Long, Artist> getArtistsByMap() {
         return TestUtil.getRandomArtists(30)
                 .toStream()
                 .collect(Collectors.toConcurrentMap(Artist::getId, artist -> artist));

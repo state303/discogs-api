@@ -1,7 +1,7 @@
 package io.dsub.discogs.api.genre.model;
 
 
-import io.dsub.discogs.api.entity.BaseEntity;
+import io.dsub.discogs.api.core.entity.BaseEntity;
 import io.dsub.discogs.api.genre.dto.GenreDTO;
 import lombok.*;
 import org.springframework.data.annotation.Id;
@@ -11,12 +11,10 @@ import org.springframework.data.relational.core.mapping.Table;
 
 import javax.validation.constraints.Size;
 
-@Data
+@Getter
 @ToString
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(callSuper = false)
 @Table(name = "genre")
 public class Genre extends BaseEntity<String> {
     @Id

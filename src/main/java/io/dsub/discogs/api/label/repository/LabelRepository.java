@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Mono;
 
 @Repository
-public interface LabelRepository extends R2dbcRepository<Label, Integer> {
+public interface LabelRepository extends R2dbcRepository<Label, Long> {
     @Query("INSERT INTO label(id, created_at, last_modified_at, contact_info, data_quality, name, profile) " +
             "VALUES (:#{[0].id}, now(), now(), :#{[0].contactInfo}, :#{[0].dataQuality}, :#{[0].name}, :#{[0].profile}) " +
             "ON CONFLICT DO UPDATE SET " +

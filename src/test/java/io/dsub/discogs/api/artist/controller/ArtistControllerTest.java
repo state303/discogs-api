@@ -60,7 +60,7 @@ class ArtistControllerTest extends ConcurrentTest {
 
     @Test
     void getArtistByIdCallsService() {
-        int id = TestUtil.getRandomIndexValue();
+        long id = TestUtil.getRandomIndexValue();
         Artist artist = TestUtil.getRandomArtist(id);
         ArtistDTO expected = artist.toDTO();
         assertNotNull(expected);
@@ -124,7 +124,7 @@ class ArtistControllerTest extends ConcurrentTest {
 
     @Test
     void deleteArtistByIdCallsService() {
-        int id = TestUtil.getRandomIndexValue();
+        long id = TestUtil.getRandomIndexValue();
         Mono<Void> voidMono = Mono.empty();
 
         given(artistService.delete(id)).willReturn(voidMono);

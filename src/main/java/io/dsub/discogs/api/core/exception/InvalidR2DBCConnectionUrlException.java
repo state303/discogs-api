@@ -1,4 +1,4 @@
-package io.dsub.discogs.api.exception;
+package io.dsub.discogs.api.core.exception;
 
 public class InvalidR2DBCConnectionUrlException extends BaseCheckedException {
     private static final String MESSAGE = "invalid r2dbc connection url";

@@ -1,7 +1,7 @@
 package io.dsub.discogs.api.database;
 
-import io.dsub.discogs.api.exception.InvalidR2DBCConnectionUrlException;
-import io.dsub.discogs.api.exception.UnsupportedDatabaseException;
+import io.dsub.discogs.api.core.exception.InvalidR2DBCConnectionUrlException;
+import io.dsub.discogs.api.core.exception.UnsupportedDatabaseException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;

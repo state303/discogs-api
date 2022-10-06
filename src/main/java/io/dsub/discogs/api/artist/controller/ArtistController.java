@@ -29,7 +29,7 @@ public class ArtistController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Mono<ArtistDTO>> getArtistById(final @PathVariable @Min(0) Integer id) {
+    public ResponseEntity<Mono<ArtistDTO>> getArtistById(final @PathVariable @Min(0) Long id) {
         return ResponseEntity.ok(artistService.findById(id));
     }
 
@@ -39,12 +39,12 @@ public class ArtistController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Mono<ArtistDTO>> updateArtist(final @PathVariable Integer id, final @RequestBody Update command) {
+    public ResponseEntity<Mono<ArtistDTO>> updateArtist(final @PathVariable Long id, final @RequestBody Update command) {
         return ResponseEntity.ok(artistService.update(id, command));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Mono<Void>> deleteArtistById(final @PathVariable Integer id) {
+    public ResponseEntity<Mono<Void>> deleteArtistById(final @PathVariable Long id) {
         return ResponseEntity.ok(artistService.delete(id));
     }
 }

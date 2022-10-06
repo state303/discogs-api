@@ -2,7 +2,7 @@ package io.dsub.discogs.api.artist.model;
 
 import io.dsub.discogs.api.artist.command.ArtistCommand;
 import io.dsub.discogs.api.artist.dto.ArtistDTO;
-import io.dsub.discogs.api.entity.BaseEntity;
+import io.dsub.discogs.api.core.entity.BaseEntity;
 import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Column;
@@ -10,18 +10,16 @@ import org.springframework.data.relational.core.mapping.Table;
 
 import javax.validation.constraints.NotBlank;
 
-
-@Data
+@Getter
 @ToString
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
 @Table(name = "artist")
-public class Artist extends BaseEntity<Integer> {
+public class Artist extends BaseEntity<Long> {
     @Id
     @Column("id")
-    private Integer id;
+    private Long id;
 
     @Column("name")
     @NotBlank

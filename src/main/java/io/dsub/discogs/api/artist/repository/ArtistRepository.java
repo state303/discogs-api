@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Mono;
 
 @Repository
-public interface ArtistRepository extends R2dbcRepository<Artist, Integer> {
+public interface ArtistRepository extends R2dbcRepository<Artist, Long> {
     // @formatter:off
     @Query("INSERT INTO artist (id, created_at, last_modified_at, data_quality, name, profile, real_name) " +
             "VALUES (:#{[0].id}, now(), now(), :#{[0].dataQuality}, :#{[0].name}, :#{[0].profile}, :#{[0].realName}) " +

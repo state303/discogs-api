@@ -1,6 +1,6 @@
 package io.dsub.discogs.api.label.service;
 
-import io.dsub.discogs.api.exception.ItemNotFoundException;
+import io.dsub.discogs.api.core.exception.ItemNotFoundException;
 import io.dsub.discogs.api.label.command.LabelCommand;
 import io.dsub.discogs.api.label.dto.LabelDTO;
 import io.dsub.discogs.api.label.model.Label;
@@ -21,7 +21,8 @@ public class LabelServiceImpl implements LabelService {
 
     private final LabelRepository labelRepository;
     private final Validator validator;
-    private final Function<Label, Mono<LabelDTO>> toDTO = label -> Mono.just(label.toDTO());
+    private final Function<Label, Mono<LabelDTO>> toDTO =
+            label -> Mono.just(label.toDTO());
 
     @Override
     public Flux<LabelDTO> getLabels() {
@@ -35,7 +36,7 @@ public class LabelServiceImpl implements LabelService {
     }
 
     @Override
-    public Mono<LabelDTO> updateLabel(Integer id, LabelCommand.Update command) {
+    public Mono<LabelDTO> updateLabel(long id, LabelCommand.Update command) {
         return validate(command)
                 .flatMap(cmd -> labelRepository.findById(id))
                 .flatMap(label -> Mono.just(label.withMutableDataFrom(command)))
@@ -52,12 +53,12 @@ public class LabelServiceImpl implements LabelService {
     }
 
     @Override
-    public Mono<Void> deleteLabel(Integer id) {
+    public Mono<Void> deleteLabel(long id) {
         return labelRepository.deleteById(id);
     }
 
     @Override
-    public Mono<LabelDTO> findById(Integer id) {
+    public Mono<LabelDTO> findById(long id) {
         return labelRepository
                 .findById(id)
                 .flatMap(toDTO)

@@ -1,4 +1,4 @@
-package io.dsub.discogs.api.entity;
+package io.dsub.discogs.api.core.entity;
 
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;

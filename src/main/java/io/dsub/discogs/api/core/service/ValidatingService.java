@@ -1,4 +1,4 @@
-package io.dsub.discogs.api.service;
+package io.dsub.discogs.api.core.service;
 
 import reactor.core.publisher.Mono;
 

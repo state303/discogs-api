@@ -40,7 +40,7 @@ public class TestUtil {
         return getRandomArtist(100);
     }
 
-    public static Artist getRandomArtist(int id) {
+    public static Artist getRandomArtist(long id) {
         Artist artist = Artist.builder()
                 .id(id)
                 .dataQuality(getRandomString(10))
@@ -52,7 +52,7 @@ public class TestUtil {
         return artist;
     }
 
-    public static Mono<Artist> getRandomArtistMono(int id) {
+    public static Mono<Artist> getRandomArtistMono(long id) {
         return Mono.just(getRandomArtist(id));
     }
 

@@ -1,4 +1,4 @@
-package io.dsub.discogs.api.exception;
+package io.dsub.discogs.api.core.exception;
 
 public class ItemNotFoundException extends BaseCheckedException {
     private static final String DEFAULT_MESSAGE = "failed to locate item";

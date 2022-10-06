@@ -1,9 +1,9 @@
 package io.dsub.discogs.api.config;
 
 import io.dsub.discogs.api.Constants;
-import io.dsub.discogs.api.exception.EnvironmentVariableException;
-import io.dsub.discogs.api.exception.MissingRequiredEnvironmentVariableException;
-import io.dsub.discogs.api.util.StringUtil;
+import io.dsub.discogs.api.core.exception.EnvironmentVariableException;
+import io.dsub.discogs.api.core.exception.MissingRequiredEnvironmentVariableException;
+import io.dsub.discogs.api.core.util.StringUtil;
 import lombok.Getter;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.env.Environment;

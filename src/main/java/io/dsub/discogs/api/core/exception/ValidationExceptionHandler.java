@@ -1,4 +1,4 @@
-package io.dsub.discogs.api.exception;
+package io.dsub.discogs.api.core.exception;
 
 
 import lombok.extern.slf4j.Slf4j;

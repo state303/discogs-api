@@ -1,4 +1,4 @@
-package io.dsub.discogs.api.util;
+package io.dsub.discogs.api.core.util;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;

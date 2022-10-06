@@ -1,7 +1,7 @@
 package io.dsub.discogs.api.style.service;
 
-import io.dsub.discogs.api.service.PagingService;
-import io.dsub.discogs.api.service.ValidatingService;
+import io.dsub.discogs.api.core.service.PagingService;
+import io.dsub.discogs.api.core.service.ValidatingService;
 import io.dsub.discogs.api.style.command.StyleCommand;
 import io.dsub.discogs.api.style.dto.StyleDTO;
 import org.springframework.data.domain.Page;

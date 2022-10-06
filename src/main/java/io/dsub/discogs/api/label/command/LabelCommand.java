@@ -13,7 +13,7 @@ public final class LabelCommand {
     public static class Create {
         @Min(0)
         @NotNull
-        private final Integer id;
+        private final Long id;
         @Size(max = 255)
         private final String name;
         private final String profile;

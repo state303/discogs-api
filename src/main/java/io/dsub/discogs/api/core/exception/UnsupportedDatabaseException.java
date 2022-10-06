@@ -1,4 +1,4 @@
-package io.dsub.discogs.api.exception;
+package io.dsub.discogs.api.core.exception;
 
 public class UnsupportedDatabaseException extends BaseCheckedException {
 
