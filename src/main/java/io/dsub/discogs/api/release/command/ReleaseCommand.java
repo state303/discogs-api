@@ -6,7 +6,6 @@ import lombok.Getter;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import java.time.LocalDateTime;
 
 public abstract class ReleaseCommand {
     @Getter
@@ -27,12 +26,8 @@ public abstract class ReleaseCommand {
         @Size(max = 10000)
         private final String title;
         @Size(max = 255)
-        private final String listedReleaseDate;
-        private final LocalDateTime releaseDate;
+        private final String releaseDate;
         private final Boolean isMaster;
-        private final Boolean hasValidDay;
-        private final Boolean hasValidMonth;
-        private final Boolean hasValidYear;
     }
 
     @Getter
@@ -50,12 +45,8 @@ public abstract class ReleaseCommand {
         @Size(max = 10000)
         private final String title;
         @Size(max = 255)
-        private final String listedReleaseDate;
-        private final LocalDateTime releaseDate;
+        private final String releaseDate;
         private final Boolean isMaster;
-        private final Boolean hasValidDay;
-        private final Boolean hasValidMonth;
-        private final Boolean hasValidYear;
     }
 
     @Getter
