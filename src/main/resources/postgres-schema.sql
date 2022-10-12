@@ -1,56 +1,77 @@
-create table if not exists public.style
+CREATE TABLE IF NOT EXISTS style
 (
-    name             varchar(255) not null
-        constraint pk_style primary key,
-    created_at       timestamp    not null,
-    last_modified_at timestamp    not null
+    name             varchar(255) NOT NULL
+        constraint pk_style
+            primary key,
+    created_at       timestamp    NOT NULL,
+    last_modified_at timestamp    NOT NULL
 );
 
-create table if not exists public.genre
+CREATE TABLE IF NOT EXISTS genre
 (
-    name             varchar(255) not null
-        constraint pk_genre primary key,
-    created_at       timestamp    not null,
-    last_modified_at timestamp    not null
+    name       varchar(255) NOT NULL
+        constraint pk_genre
+            primary key,
+    created_at timestamp    NOT NULL
 );
 
-create table if not exists public.artist
+CREATE TABLE IF NOT EXISTS artist
 (
-    id               integer
-        constraint pk_artist primary key,
-    created_at       timestamp not null,
-    last_modified_at timestamp not null,
+    id               integer   NOT NULL
+        constraint pk_artist
+            primary key,
+    created_at       timestamp NOT NULL,
+    last_modified_at timestamp NOT NULL,
     data_quality     varchar(255),
     name             varchar(1000),
     profile          text,
     real_name        varchar(2000)
 );
 
-create table if not exists public.label
+CREATE TABLE IF NOT EXISTS label
 (
-    id               integer
-        constraint pk_label primary key,
-    created_at       timestamp not null,
-    last_modified_at timestamp not null,
+    id               integer   NOT NULL
+        constraint pk_label
+            primary key,
+    created_at       timestamp NOT NULL,
+    last_modified_at timestamp NOT NULL,
     contact_info     text,
     data_quality     varchar(255),
     name             varchar(255),
-    profile          text
+    profile          text,
+    parent_label_id  integer
+        constraint fk_label_parent_label_id_label_id
+            references label
 );
 
-create table if not exists public.release
+CREATE TABLE IF NOT EXISTS master
 (
-    id                  integer
-        constraint pk_release primary key,
-    created_at          timestamp not null,
-    last_modified_at    timestamp not null,
+    id               integer   NOT NULL
+        constraint pk_master
+            primary key,
+    created_at       timestamp NOT NULL,
+    last_modified_at timestamp NOT NULL,
+    data_quality     varchar(255),
+    title            varchar(2000),
+    year             smallint
+);
+
+CREATE TABLE IF NOT EXISTS release
+(
+    id                  integer   NOT NULL
+        constraint pk_release
+            primary key,
+    created_at          timestamp NOT NULL,
+    last_modified_at    timestamp NOT NULL,
     country             varchar(255),
     data_quality        varchar(255),
     has_valid_day       boolean,
     has_valid_month     boolean,
     has_valid_year      boolean,
     is_master           boolean,
-    master_id           integer,
+    master_id           integer
+        constraint fk_release_master_id_master
+            references master,
     listed_release_date varchar(255),
     notes               text,
     release_date        date,
@@ -58,337 +79,282 @@ create table if not exists public.release
     title               varchar(10000)
 );
 
-create table if not exists public.master
+CREATE TABLE IF NOT EXISTS release_genre
 (
-    id               integer
-        constraint pk_master primary key,
-    created_at       timestamp not null,
-    last_modified_at timestamp not null,
-    data_quality     varchar(255),
-    title            varchar(2000),
-    year             smallint,
-    main_release_id  integer
-        constraint fk_master_main_release_id_release references public.release
+    created_at timestamp    NOT NULL,
+    genre      varchar(255) NOT NULL
+        constraint fk_release_genre_genre_genre
+            references genre,
+    release_id integer      NOT NULL
+        constraint fk_release_genre_release_id_release
+            references release,
+    constraint pk_release_genre
+        primary key (release_id, genre)
 );
 
-create table if not exists public.release_genre
+CREATE TABLE IF NOT EXISTS release_track
 (
-    id               uuid
-        constraint pk_release_genre primary key,
-    created_at       timestamp    not null,
-    last_modified_at timestamp    not null,
-    genre            varchar(255) not null
-        constraint fk_release_genre_genre_genre references public.genre,
-    release_id  integer      not null
-        constraint fk_release_genre_release_id_release references public.release,
-    constraint uq_release_genre_release_id_genre unique (release_id, genre)
+    created_at timestamp NOT NULL,
+    hash       integer   NOT NULL,
+    duration   text,
+    position   text,
+    title      text,
+    release_id integer   NOT NULL
+        constraint fk_release_track_release_id_release
+            references release,
+    constraint pk_release_track
+        primary key (release_id, hash)
 );
 
-create table if not exists public.release_track
+CREATE TABLE IF NOT EXISTS label_release
 (
-    id               uuid
-        constraint pk_release_track primary key,
-    created_at       timestamp not null,
-    last_modified_at timestamp not null,
-    hash             integer   not null,
-    duration         text,
-    position         text,
-    title            text,
-    release_id  integer   not null
-        constraint fk_release_track_release_id_release references public.release,
-    constraint uq_release_track_release_id_hash unique (release_id, hash)
-);
-
-create table if not exists public.label_release
-(
-    id                uuid
-        constraint pk_label_release primary key,
-    created_at        timestamp not null,
-    last_modified_at  timestamp not null,
+    created_at        timestamp NOT NULL,
     category_notation varchar(1000),
-    label_id          integer   not null
-        constraint fk_label_release_label_id_label references public.label,
-    release_id   integer   not null
-        constraint fk_label_release_release_id_release references public.release,
-    constraint uq_label_release_release_id_label_id unique (release_id, label_id)
+    label_id          integer   NOT NULL
+        constraint fk_label_release_label_id_label
+            references label,
+    release_id        integer   NOT NULL
+        constraint fk_label_release_release_id_release
+            references release,
+    constraint pk_label_release
+        primary key (label_id, release_id)
 );
 
-create table if not exists public.release_image
+CREATE TABLE IF NOT EXISTS release_image
 (
-    id               uuid
+    id               uuid      NOT NULL
         constraint pk_release_image
             primary key,
-    created_at       timestamp not null,
-    last_modified_at timestamp not null,
-    hash             integer   not null,
+    created_at       timestamp NOT NULL,
+    last_modified_at timestamp NOT NULL,
+    hash             integer   NOT NULL,
     data             text,
-    release_id  integer   not null
-        constraint fk_release_image_release_id_release references public.release,
-    constraint uq_release_image_release_id_hash unique (release_id, hash)
+    release_id       integer   NOT NULL
+        constraint fk_release_image_release_id_release
+            references release,
+    constraint uq_release_image_release_id_hash
+        unique (release_id, hash)
 );
 
-create table if not exists public.release_work
+CREATE TABLE IF NOT EXISTS release_contract
 (
-    id               uuid
-        constraint pk_release_work primary key,
-    created_at       timestamp not null,
-    last_modified_at timestamp not null,
-    hash             integer   not null,
-    work             varchar(5000),
-    label_id         integer   not null
-        constraint fk_release_work_label_id_label references public.label,
-    release_id  integer   not null
-        constraint fk_release_work_release_id_release references public.release,
-    constraint uq_release_work_release_id_label_id_hash unique (release_id, label_id, hash)
+    created_at timestamp NOT NULL,
+    hash       integer   NOT NULL,
+    contract   varchar(5000),
+    label_id   integer   NOT NULL
+        constraint fk_release_contract_label_id_label
+            references label,
+    release_id integer   NOT NULL
+        constraint fk_release_contract_release_id_release
+            references release,
+    constraint pk_release_contract
+        primary key (release_id, label_id, hash)
 );
 
-create table if not exists public.release_identifier
+CREATE TABLE IF NOT EXISTS release_identifier
 (
-    id               uuid
-        constraint pk_release_identifier primary key,
-    created_at       timestamp not null,
-    last_modified_at timestamp not null,
-    hash             integer   not null,
-    description      text,
-    type             text,
-    value            text,
-    release_id  integer   not null
-        constraint fk_release_identifier_release_id_release references public.release,
-    constraint uq_release_identifier_release_id_hash unique (release_id, hash)
+    created_at  timestamp NOT NULL,
+    hash        integer   NOT NULL,
+    description text,
+    type        text,
+    value       text,
+    release_id  integer   NOT NULL
+        constraint fk_release_identifier_release_id_release
+            references release,
+    constraint pk_release_identifier
+        primary key (release_id, hash)
 );
 
-create table if not exists public.master_video
+CREATE TABLE IF NOT EXISTS master_video
 (
-    id               uuid
-        constraint pk_master_video primary key,
-    created_at       timestamp not null,
-    last_modified_at timestamp not null,
-    hash             integer   not null,
-    description      varchar(15000),
-    title            varchar(1000),
-    url              varchar(1000),
-    master_id        integer   not null
-        constraint fk_master_video_master_id_master references public.master,
-    constraint uq_master_video_master_id_hash unique (master_id, hash)
+    created_at  timestamp NOT NULL,
+    hash        integer   NOT NULL,
+    description varchar(15000),
+    title       varchar(1000),
+    url         varchar(1000),
+    master_id   integer   NOT NULL
+        constraint fk_master_video_master_id_master
+            references master,
+    constraint pk_master_video
+        primary key (master_id, hash)
 );
 
-create table if not exists public.master_genre
+CREATE TABLE IF NOT EXISTS master_genre
 (
-    id               uuid
-        constraint pk_master_genre primary key,
-    created_at       timestamp    not null,
-    last_modified_at timestamp    not null,
-    genre            varchar(255) not null
-        constraint fk_master_genre_genre_genre references public.genre,
-    master_id        integer      not null
-        constraint fk_master_genre_master_id_master references public.master,
-    constraint uq_master_genre_master_id_genre unique (master_id, genre)
+    created_at timestamp    NOT NULL,
+    genre      varchar(255) NOT NULL
+        constraint fk_master_genre_genre_genre
+            references genre,
+    master_id  integer      NOT NULL
+        constraint fk_master_genre_master_id_master
+            references master,
+    constraint pk_master_genre
+        primary key (master_id, genre)
 );
 
-create table if not exists public.master_style
+CREATE TABLE IF NOT EXISTS master_style
 (
-    id               uuid
-        constraint pk_master_style primary key,
-    created_at       timestamp    not null,
-    last_modified_at timestamp    not null,
-    master_id        integer      not null
-        constraint fk_master_style_master_id_master references public.master,
-    style            varchar(255) not null
-        constraint fk_master_style_style_style references public.style,
-    constraint uq_master_style_master_id_style unique (master_id, style)
+    created_at timestamp    NOT NULL,
+    master_id  integer      NOT NULL
+        constraint fk_master_style_master_id_master
+            references master,
+    style      varchar(255) NOT NULL
+        constraint fk_master_style_style_style
+            references style,
+    constraint pk_master_style
+        primary key (master_id, style)
 );
 
-create table if not exists public.release_style
+CREATE TABLE IF NOT EXISTS master_main_release
 (
-    id               uuid
-        constraint pk_release_style primary key,
-    created_at       timestamp    not null,
-    last_modified_at timestamp    not null,
-    release_id  integer      not null
-        constraint fk_release_style_release_id_release references public.release,
-    style            varchar(255) not null
-        constraint fk_release_style_style_style references public.style,
-    constraint uq_release_style_release_id_style unique (release_id, style)
+    created_at timestamp NOT NULL,
+    master_id  integer   NOT NULL
+        constraint fk_master_main_release_master_id_master
+            references master,
+    release_id integer   NOT NULL
+        constraint fk_master_main_release_release_id_release
+            references release
 );
 
-create table if not exists public.label_sub_label
+CREATE TABLE IF NOT EXISTS release_style
 (
-    id               uuid
-        constraint pk_label_sub_label primary key,
-    created_at       timestamp not null,
-    last_modified_at timestamp not null,
-    parent_label_id  integer   not null
-        constraint fk_label_sub_label_parent_label_id_label references public.label,
-    sub_label_id     integer   not null
-        constraint fk_label_sub_label_sub_label_id_label references public.label,
-    constraint uq_label_sub_label_parent_label_id_sub_label_id unique (parent_label_id, sub_label_id)
+    created_at timestamp    NOT NULL,
+    release_id integer      NOT NULL
+        constraint fk_release_style_release_id_release
+            references release,
+    style      varchar(255) NOT NULL
+        constraint fk_release_style_style_style
+            references style,
+    constraint pk_release_style
+        primary key (release_id, style)
 );
 
-create table if not exists public.release_video
+CREATE TABLE IF NOT EXISTS release_video
 (
-    id               uuid
-        constraint pk_release_video primary key,
-    created_at       timestamp not null,
-    last_modified_at timestamp not null,
-    hash             integer   not null,
-    description      text,
-    title            text,
-    url              text,
-    release_id  integer   not null
-        constraint fk_release_video_release_id_release references public.release,
-    constraint uq_release_video_release_id_hash unique (release_id, hash)
+    created_at  timestamp NOT NULL,
+    hash        integer   NOT NULL,
+    description text,
+    title       text,
+    url         text,
+    release_id  integer   NOT NULL
+        constraint fk_release_video_release_id_release
+            references release,
+    constraint pk_release_video
+        primary key (release_id, hash)
 );
 
-create table if not exists public.label_url
+CREATE TABLE IF NOT EXISTS label_url
 (
-    id               uuid
-        constraint pk_label_url primary key,
-    created_at       timestamp     not null,
-    last_modified_at timestamp     not null,
-    hash             integer       not null,
-    url              varchar(5000) not null,
-    label_id         integer       not null
-        constraint fk_label_url_label_id_label references public.label,
-    constraint uq_label_url_label_id_hash unique (label_id, hash)
+    created_at timestamp     NOT NULL,
+    hash       integer       NOT NULL,
+    url        varchar(5000) NOT NULL,
+    label_id   integer       NOT NULL
+        constraint fk_label_url_label_id_label
+            references label,
+    constraint pk_label_url
+        primary key (label_id, hash)
 );
 
-create table if not exists public.release_format
+CREATE TABLE IF NOT EXISTS release_format
 (
-    id               uuid
-        constraint pk_release_format primary key,
-    created_at       timestamp not null,
-    last_modified_at timestamp not null,
-    hash             integer   not null,
-    description      varchar(10000),
-    name             varchar(255),
-    quantity         integer,
-    text             varchar(5000),
-    release_id  integer   not null
-        constraint fk_release_format_release_id_release references public.release,
-    constraint uq_release_format_release_id_hash unique (release_id, hash)
+    created_at  timestamp NOT NULL,
+    hash        integer   NOT NULL,
+    description varchar(10000),
+    name        varchar(255),
+    quantity    integer,
+    text        varchar(5000),
+    release_id  integer   NOT NULL
+        constraint fk_release_format_release_id_release
+            references release,
+    constraint pk_release_format
+        primary key (release_id, hash)
 );
 
-create table if not exists public.artist_alias
+CREATE TABLE IF NOT EXISTS artist_alias
 (
-    id               uuid
-        constraint pk_artist_alias primary key,
-    created_at       timestamp not null,
-    last_modified_at timestamp not null,
-    alias_id         integer   not null
-        constraint fk_artist_alias_alias_id_artist references public.artist,
-    artist_id        integer   not null
-        constraint fk_artist_alias_artist_id_artist references public.artist,
-    constraint uq_artist_alias_artist_id_alias_id unique (artist_id, alias_id)
+    created_at timestamp NOT NULL,
+    alias_id   integer   NOT NULL
+        constraint fk_artist_alias_alias_id_artist
+            references artist,
+    artist_id  integer   NOT NULL
+        constraint fk_artist_alias_artist_id_artist
+            references artist,
+    constraint pk_artist_alias
+        primary key (artist_id, alias_id)
 );
 
-create table if not exists public.artist_name_variation
+CREATE TABLE IF NOT EXISTS artist_name_variation
 (
-    id               uuid
-        constraint pk_artist_name_variation primary key,
-    created_at       timestamp     not null,
-    hash             integer       not null,
-    last_modified_at timestamp     not null,
-    name_variation   varchar(2000) not null,
-    artist_id        integer       not null
-        constraint fk_artist_name_variation_artist_id_artist references public.artist,
-    constraint uq_artist_name_variation_artist_id_hash unique (artist_id, hash)
+    created_at     timestamp     NOT NULL,
+    hash           integer       NOT NULL,
+    name_variation varchar(2000) NOT NULL,
+    artist_id      integer       NOT NULL
+        constraint fk_artist_name_variation_artist_id_artist
+            references artist,
+    constraint pk_artist_name_variation
+        primary key (artist_id, hash)
 );
 
-create table if not exists public.master_artist
+CREATE TABLE IF NOT EXISTS master_artist
 (
-    id               uuid
-        constraint pk_master_artist primary key,
-    created_at       timestamp not null,
-    last_modified_at timestamp not null,
-    artist_id        integer   not null
-        constraint fk_master_artist_artist_id_artist references public.artist,
-    master_id        integer   not null
-        constraint fk_master_artist_master_id_master references public.master,
-    constraint uq_master_artist_master_id_artist_id unique (master_id, artist_id)
+    created_at timestamp NOT NULL,
+    artist_id  integer   NOT NULL
+        constraint fk_master_artist_artist_id_artist
+            references artist,
+    master_id  integer   NOT NULL
+        constraint fk_master_artist_master_id_master
+            references master,
+    constraint pk_master_artist
+        primary key (master_id, artist_id)
 );
 
-create table if not exists public.release_artist
+CREATE TABLE IF NOT EXISTS release_artist
 (
-    id               uuid
-        constraint pk_release_artist primary key,
-    created_at       timestamp not null,
-    last_modified_at timestamp not null,
-    artist_id        integer   not null
-        constraint fk_release_artist_artist_id_artist references public.artist,
-    release_id  integer   not null
-        constraint fk_release_artist_release_id_release references public.release,
-    constraint uq_release_artist_release_id_artist_id unique (release_id, artist_id)
+    created_at timestamp NOT NULL,
+    artist_id  integer   NOT NULL
+        constraint fk_release_artist_artist_id_artist
+            references artist,
+    release_id integer   NOT NULL
+        constraint fk_release_artist_release_id_release
+            references release,
+    constraint pk_release_artist
+        primary key (release_id, artist_id)
 );
 
-create table if not exists public.release_credited_artist
+CREATE TABLE IF NOT EXISTS release_credited_artist
 (
-    id               uuid
-        constraint pk_release_credited_artist primary key,
-    created_at       timestamp not null,
-    last_modified_at timestamp not null,
-    hash             integer   not null,
-    role             varchar(20000),
-    artist_id        integer   not null
-        constraint fk_release_credited_artist_artist_id_artist references public.artist,
-    release_id  integer   not null
-        constraint fk_release_credited_artist_release_id_release references public.release,
-    constraint uq_release_credited_artist_release_id_artist_id_hash unique (release_id, artist_id, hash)
+    created_at timestamp NOT NULL,
+    hash       integer   NOT NULL,
+    role       varchar(20000),
+    artist_id  integer   NOT NULL
+        constraint fk_release_credited_artist_artist_id_artist
+            references artist,
+    release_id integer   NOT NULL
+        constraint fk_release_credited_artist_release_id_release
+            references release,
+    constraint pk_release_credited_artist
+        primary key (release_id, artist_id, hash)
 );
 
-create table if not exists public.artist_url
+CREATE TABLE IF NOT EXISTS artist_url
 (
-    id               uuid
-        constraint pk_artist_url primary key,
-    created_at       timestamp     not null,
-    last_modified_at timestamp     not null,
-    hash             integer       not null,
-    url              varchar(5000) not null,
-    artist_id        integer       not null
-        constraint fk_artist_url_artist_id_artist references public.artist,
-    constraint uq_artist_url_artist_id_hash unique (artist_id, hash)
+    created_at timestamp     NOT NULL,
+    hash       integer       NOT NULL,
+    url        varchar(5000) NOT NULL,
+    artist_id  integer       NOT NULL
+        constraint fk_artist_url_artist_id_artist
+            references artist,
+    constraint pk_artist_url
+        primary key (artist_id, hash)
 );
 
-create table if not exists public.artist_group
+CREATE TABLE IF NOT EXISTS artist_group
 (
-    id               uuid
-        constraint pk_artist_group primary key,
-    created_at       timestamp not null,
-    last_modified_at timestamp not null,
-    artist_id        integer   not null
-        constraint fk_artist_group_artist_id_artist references public.artist,
-    group_id         integer   not null
-        constraint fk_artist_group_group_id_artist references public.artist,
-    constraint uq_artist_group_artist_id_group_id unique (artist_id, group_id)
+    created_at timestamp NOT NULL,
+    artist_id  integer   NOT NULL
+        constraint fk_artist_group_artist_id_artist
+            references artist,
+    group_id   integer   NOT NULL
+        constraint fk_artist_group_group_id_artist
+            references artist
 );
-
-create table if not exists public.artist_member
-(
-    id               uuid
-        constraint pk_artist_member primary key,
-    created_at       timestamp not null,
-    last_modified_at timestamp not null,
-    artist_id        integer   not null
-        constraint fk_artist_member_artist_id_artist references public.artist,
-    member_id        integer   not null
-        constraint fk_artist_member_member_id_artist references public.artist,
-    constraint uq_artist_member_artist_id_member_id unique (artist_id, member_id)
-);
-
-CREATE OR REPLACE FUNCTION create_constraint_if_not_exists(t_name text, c_name text, constraint_sql text)
-    RETURNS void
-AS
-'
-    BEGIN
-        IF NOT EXISTS(SELECT constraint_name
-                      FROM information_schema.constraint_column_usage
-                      WHERE constraint_name = c_name) THEN
-            EXECUTE ''ALTER TABLE '' || t_name || '' ADD CONSTRAINT '' || c_name || '' '' || constraint_sql;
-        END IF;
-    END;
-'
-    LANGUAGE plpgsql VOLATILE;
-
-SELECT create_constraint_if_not_exists('public.release', 'fk_release_master_id_master',
-                                       'foreign key (master_id) references public.master;');
-
-drop function create_constraint_if_not_exists(t_name text, c_name text, constraint_sql text);
