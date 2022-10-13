@@ -5,9 +5,11 @@ import io.dsub.discogs.api.label.command.LabelCommand;
 import io.dsub.discogs.api.label.dto.LabelDTO;
 import lombok.*;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Reference;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
@@ -41,6 +43,11 @@ public class Label extends PersistableBaseEntity<Long> {
 
     @Column("contact_info")
     private String contactInfo;
+
+    @Min(0)
+    @Reference(Label.class)
+    @Column("parent_label_id")
+    private Long parentLabelId;
 
     public Label withMutableDataFrom(LabelCommand.Update command) {
         return Label.builder()

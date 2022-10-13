@@ -7,9 +7,7 @@ import javax.validation.ConstraintViolationException;
 
 @RequiredArgsConstructor
 public class ValidatorImpl implements Validator {
-
     private final javax.validation.Validator delegate;
-
     public <T> Mono<T> validate(T object) {
         return Mono.just(delegate.validate(object))
                 .flatMap(violations -> {

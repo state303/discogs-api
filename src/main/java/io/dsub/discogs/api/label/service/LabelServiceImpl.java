@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDateTime;
 import java.util.function.Function;
 
 @Service
@@ -23,6 +24,17 @@ public class LabelServiceImpl implements LabelService {
     private final Validator validator;
     private final Function<Label, Mono<LabelDTO>> toDTO =
             label -> Mono.just(label.toDTO());
+
+    private final Function<LabelCommand.Create, Mono<Label>> createCommandToLabelMono =
+            command -> Mono.just(command)
+                    .flatMap(c -> Mono.just(Label.builder()
+                            .createdAt(LocalDateTime.now())
+                            .lastModifiedAt(LocalDateTime.now())
+                            .id(c.getId())
+                            .name(c.getName())
+                            .profile(c.getProfile())
+                            .parentLabelId(c.getParentLabelId())
+                            .build()));
 
     @Override
     public Flux<LabelDTO> getLabels() {
@@ -48,6 +60,7 @@ public class LabelServiceImpl implements LabelService {
     @Override
     public Mono<LabelDTO> saveOrUpdate(LabelCommand.Create command) {
         return validate(command)
+                .flatMap(createCommandToLabelMono)
                 .flatMap(labelRepository::saveOrUpdate)
                 .flatMap(toDTO);
     }

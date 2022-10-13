@@ -12,10 +12,11 @@ public interface LabelRepository extends R2dbcRepository<Label, Long> {
     @Query("INSERT INTO label(id, created_at, last_modified_at, contact_info, data_quality, name, profile) " +
             "VALUES (:#{[0].id}, :#{[0].createdAt}, :#{[0].lastModifiedAt}, :#{[0].contactInfo}, :#{[0].dataQuality}, :#{[0].name}, :#{[0].profile}) " +
             "ON CONFLICT DO UPDATE SET " +
-            "last_modified_at=now(), " +
-            "contact_info=excluded.contact_info, " +
-            "data_quality=excluded.data_quality, " +
-            "name=excluded.name, " +
-            "profile=excluded.profile")
-    Mono<Label> saveOrUpdate(LabelCommand.Create command);
+            "created_at=:#{[0].createdAt}, " +
+            "last_modified_at=:#{[0].lastModifiedAt}, " +
+            "contact_info=:#{[0].contactInfo}, " +
+            "data_quality=:#{[0].dataQuality}, " +
+            "name=:#{[0].name}, " +
+            "profile=:#{[0].profile}")
+    Mono<Label> saveOrUpdate(Label label);
 }

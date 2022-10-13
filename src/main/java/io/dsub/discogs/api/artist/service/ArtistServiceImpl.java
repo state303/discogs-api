@@ -29,7 +29,7 @@ public class ArtistServiceImpl implements ArtistService {
     private final Function<Artist, Mono<ArtistDTO>> toDTO = artist -> Mono.just(artist.toDTO());
     private final Predicate<Long> greaterThanZero = i -> i > 0;
     private final Function<Create, Mono<Artist>> createCommandToArtistMono = create -> Mono.just(create)
-            .map(c -> Artist.builder()
+            .flatMap(c -> Mono.just(Artist.builder()
                     .id(c.getId())
                     .createdAt(LocalDateTime.now())
                     .lastModifiedAt(LocalDateTime.now())
@@ -37,7 +37,7 @@ public class ArtistServiceImpl implements ArtistService {
                     .realName(c.getRealName())
                     .profile(c.getProfile())
                     .dataQuality(c.getDataQuality())
-                    .build());
+                    .build()));
 
     @Override
     public Mono<Page<ArtistDTO>> getArtists(Pageable pageable) {

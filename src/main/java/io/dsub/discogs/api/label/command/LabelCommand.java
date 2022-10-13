@@ -20,6 +20,8 @@ public final class LabelCommand {
         @Size(max = 255)
         private final String dataQuality;
         private final String contactInfo;
+        @Min(0)
+        private final Long parentLabelId;
     }
 
     @Getter
@@ -31,5 +33,7 @@ public final class LabelCommand {
         @Size(max = 255)
         private final String dataQuality;
         private final String contactInfo;
+        @Min(0)
+        private final Long parentLabelId;
     }
 }
