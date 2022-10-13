@@ -36,7 +36,6 @@ public class Artist extends PersistableBaseEntity<Long> {
     private LocalDateTime lastModifiedAt;
 
     @Column("name")
-    @NotBlank
     private String name;
 
     @Column("real_name")
