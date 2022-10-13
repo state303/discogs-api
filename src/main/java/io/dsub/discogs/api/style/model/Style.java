@@ -8,6 +8,7 @@ import org.springframework.data.annotation.Transient;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
@@ -20,7 +21,8 @@ import java.time.LocalDateTime;
 @Table(name = "style")
 public class Style extends PersistableBaseEntity<String> {
     @Id
-    @Size(min = 1, max = 255)
+    @NotBlank
+    @Size(max = 255)
     @Column("name")
     private String name;
 
