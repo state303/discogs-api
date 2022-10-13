@@ -9,8 +9,8 @@ import reactor.core.publisher.Mono;
 
 @Repository
 public interface GenreRepository extends R2dbcRepository<Genre, String> {
-    @Query("INSERT INTO genre(name, created_at, last_modified_at) " +
-            "VALUES (:#{[0].name}, now(), now()) " +
+    @Query("INSERT INTO genre(name, created_at) " +
+            "VALUES (:#{[0].name}, now()) " +
             "ON CONFLICT (name) DO NOTHING")
     Mono<Genre> saveOrUpdate(GenreCommand.Create command);
 }

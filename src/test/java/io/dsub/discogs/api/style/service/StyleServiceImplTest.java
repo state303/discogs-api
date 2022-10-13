@@ -21,6 +21,7 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import javax.validation.ConstraintViolationException;
+import java.time.LocalDateTime;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.IntStream;
@@ -140,14 +141,14 @@ class StyleServiceImplTest extends ConcurrentTest {
         assertNotNull(dto);
 
         given(validator.validate(createCommand)).willReturn(Mono.just(createCommand));
-        given(styleRepository.insert(createCommand)).willReturn(Mono.just(style));
+        given(styleRepository.saveOrUpdate(createCommand)).willReturn(Mono.just(style));
 
         StepVerifier.create(styleService.save(createCommand))
                 .expectNext(dto)
                 .verifyComplete();
 
         verify(validator, times(1)).validate(createCommand);
-        verify(styleRepository, times(1)).insert(createCommand);
+        verify(styleRepository, times(1)).saveOrUpdate(createCommand);
     }
 
     @Test
@@ -189,6 +190,6 @@ class StyleServiceImplTest extends ConcurrentTest {
     }
 
     private Style getStyle() {
-        return new Style(TestUtil.getRandomString());
+        return new Style(TestUtil.getRandomString(), LocalDateTime.now());
     }
 }

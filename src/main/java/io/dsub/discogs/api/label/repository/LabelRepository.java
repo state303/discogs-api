@@ -10,7 +10,7 @@ import reactor.core.publisher.Mono;
 @Repository
 public interface LabelRepository extends R2dbcRepository<Label, Long> {
     @Query("INSERT INTO label(id, created_at, last_modified_at, contact_info, data_quality, name, profile) " +
-            "VALUES (:#{[0].id}, now(), now(), :#{[0].contactInfo}, :#{[0].dataQuality}, :#{[0].name}, :#{[0].profile}) " +
+            "VALUES (:#{[0].id}, :#{[0].createdAt}, :#{[0].lastModifiedAt}, :#{[0].contactInfo}, :#{[0].dataQuality}, :#{[0].name}, :#{[0].profile}) " +
             "ON CONFLICT DO UPDATE SET " +
             "last_modified_at=now(), " +
             "contact_info=excluded.contact_info, " +

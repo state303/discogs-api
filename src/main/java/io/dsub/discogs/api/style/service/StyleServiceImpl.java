@@ -37,7 +37,7 @@ public class StyleServiceImpl implements StyleService {
     @Override
     public Mono<StyleDTO> save(StyleCommand.Create command) {
         return validate(command)
-                .flatMap(styleRepository::insert)
+                .flatMap(styleRepository::saveOrUpdate)
                 .flatMap(toDTO);
     }
 

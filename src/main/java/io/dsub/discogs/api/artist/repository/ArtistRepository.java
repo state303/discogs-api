@@ -11,7 +11,7 @@ import reactor.core.publisher.Mono;
 public interface ArtistRepository extends R2dbcRepository<Artist, Long> {
     // @formatter:off
     @Query("INSERT INTO artist (id, created_at, last_modified_at, data_quality, name, profile, real_name) " +
-            "VALUES (:#{[0].id}, now(), now(), :#{[0].dataQuality}, :#{[0].name}, :#{[0].profile}, :#{[0].realName}) " +
+            "VALUES (:#{[0].id}, :#{[0].createdAt}, :#{[0].lastModifiedAt}, :#{[0].dataQuality}, :#{[0].name}, :#{[0].profile}, :#{[0].realName}) " +
             "ON CONFLICT (id) DO UPDATE SET " +
             "last_modified_at=now(), " +
             "data_quality=excluded.data_quality, " +

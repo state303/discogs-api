@@ -21,6 +21,7 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import javax.validation.ConstraintViolationException;
+import java.time.LocalDateTime;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.IntStream;
@@ -189,6 +190,6 @@ class GenreServiceImplTest extends ConcurrentTest {
         return IntStream.range(0, size).mapToObj(i -> getGenre()).toList();
     }
     private Genre getGenre() {
-        return new Genre(TestUtil.getRandomString());
+        return new Genre(TestUtil.getRandomString(), LocalDateTime.now());
     }
 }

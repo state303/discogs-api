@@ -1,26 +1,35 @@
 package io.dsub.discogs.api.genre.model;
 
 
-import io.dsub.discogs.api.core.entity.BaseEntity;
+import io.dsub.discogs.api.core.entity.PersistableBaseEntity;
 import io.dsub.discogs.api.genre.dto.GenreDTO;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.ToString;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import java.time.LocalDateTime;
 
 @Getter
 @ToString
 @Builder
 @AllArgsConstructor
 @Table(name = "genre")
-public class Genre extends BaseEntity<String> {
+public class Genre extends PersistableBaseEntity<String> {
     @Id
     @Column("name")
     @Size(min = 1, max = 255)
     private String name;
+
+    @Column("created_at")
+    @NotNull
+    private LocalDateTime createdAt;
 
     @Override
     @Transient

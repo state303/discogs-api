@@ -1,6 +1,6 @@
 package io.dsub.discogs.api.release.model;
 
-import io.dsub.discogs.api.core.entity.BaseEntity;
+import io.dsub.discogs.api.core.entity.PersistableBaseEntity;
 import io.dsub.discogs.api.release.dto.ReleaseDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -10,6 +10,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
+import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
 @Getter
@@ -17,10 +18,18 @@ import java.time.LocalDateTime;
 @Builder
 @AllArgsConstructor
 @Table(name = "release")
-public class Release extends BaseEntity<Long> {
+public class Release extends PersistableBaseEntity<Long> {
     @Id
     @Column("id")
     private Long id;
+
+    @NotNull
+    @Column("created_at")
+    private LocalDateTime createdAt;
+
+    @NotNull
+    @Column("last_modified_at")
+    private LocalDateTime lastModifiedAt;
 
     @Column("country")
     private String country;

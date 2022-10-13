@@ -2,13 +2,17 @@ package io.dsub.discogs.api.artist.model;
 
 import io.dsub.discogs.api.artist.command.ArtistCommand;
 import io.dsub.discogs.api.artist.dto.ArtistDTO;
-import io.dsub.discogs.api.core.entity.BaseEntity;
+import io.dsub.discogs.api.core.entity.PersistableBaseEntity;
 import lombok.*;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import java.time.LocalDateTime;
 
 @Getter
 @ToString
@@ -16,10 +20,20 @@ import javax.validation.constraints.NotBlank;
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
 @Table(name = "artist")
-public class Artist extends BaseEntity<Long> {
+public class Artist extends PersistableBaseEntity<Long> {
     @Id
+    @NotNull
+    @Min(0)
     @Column("id")
     private Long id;
+
+    @Column("created_at")
+    @NotNull
+    private LocalDateTime createdAt;
+
+    @Column("last_modified_at")
+    @NotNull
+    private LocalDateTime lastModifiedAt;
 
     @Column("name")
     @NotBlank
@@ -41,16 +55,17 @@ public class Artist extends BaseEntity<Long> {
                 .dataQuality(command.getDataQuality())
                 .realName(command.getRealName())
                 .name(command.getName())
+                .lastModifiedAt(LocalDateTime.now())
                 .build();
     }
 
     public ArtistDTO toDTO() {
         return ArtistDTO.builder()
-                .id(id)
-                .profile(profile)
-                .dataQuality(dataQuality)
-                .realName(realName)
-                .name(name)
+                .id(this.id)
+                .profile(this.profile)
+                .dataQuality(this.dataQuality)
+                .realName(this.realName)
+                .name(this.name)
                 .build();
     }
 }

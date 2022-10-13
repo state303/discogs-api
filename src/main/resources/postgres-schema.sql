@@ -3,8 +3,7 @@ CREATE TABLE IF NOT EXISTS style
     name             varchar(255) NOT NULL
         constraint pk_style
             primary key,
-    created_at       timestamp    NOT NULL,
-    last_modified_at timestamp    NOT NULL
+    created_at       timestamp    NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS genre
