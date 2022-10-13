@@ -13,12 +13,12 @@ public interface ArtistRepository extends R2dbcRepository<Artist, Long> {
     @Query("INSERT INTO artist (id, created_at, last_modified_at, data_quality, name, profile, real_name) " +
             "VALUES (:#{[0].id}, :#{[0].createdAt}, :#{[0].lastModifiedAt}, :#{[0].dataQuality}, :#{[0].name}, :#{[0].profile}, :#{[0].realName}) " +
             "ON CONFLICT (id) DO UPDATE SET " +
-            "last_modified_at=now(), " +
-            "data_quality=excluded.data_quality, " +
-            "name=excluded.name, " +
-            "profile=excluded.profile, " +
-            "real_name=excluded.real_name " +
-            "WHERE artist.id=excluded.id")
+            "last_modified_at=:#{[0].lastModifiedAt}, " +
+            "data_quality=:#{[0].dataQuality}, " +
+            "name=:#{[0].name}, " +
+            "profile=:#{[0].profile}, " +
+            "real_name=:#{[0].realName} " +
+            "WHERE artist.id=:#{[0].id}")
     // @formatter:on
-    Mono<Artist> saveOrUpdate(Create command);
+    Mono<Artist> saveOrUpdate(Artist artist);
 }

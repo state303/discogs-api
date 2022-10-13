@@ -28,6 +28,16 @@ public class ArtistServiceImpl implements ArtistService {
     private final Validator validator;
     private final Function<Artist, Mono<ArtistDTO>> toDTO = artist -> Mono.just(artist.toDTO());
     private final Predicate<Long> greaterThanZero = i -> i > 0;
+    private final Function<Create, Mono<Artist>> createCommandToArtistMono = create -> Mono.just(create)
+            .map(c -> Artist.builder()
+                    .id(c.getId())
+                    .createdAt(LocalDateTime.now())
+                    .lastModifiedAt(LocalDateTime.now())
+                    .name(c.getName())
+                    .realName(c.getRealName())
+                    .profile(c.getProfile())
+                    .dataQuality(c.getDataQuality())
+                    .build());
 
     @Override
     public Mono<Page<ArtistDTO>> getArtists(Pageable pageable) {
@@ -41,8 +51,9 @@ public class ArtistServiceImpl implements ArtistService {
     }
 
     @Override
-    public Mono<ArtistDTO> saveOrUpdate(Create command) {
+    public Mono<ArtistDTO> upsert(Create command) {
         return validate(command)
+                .flatMap(createCommandToArtistMono)
                 .flatMap(artistRepository::saveOrUpdate)
                 .flatMap(toDTO);
     }

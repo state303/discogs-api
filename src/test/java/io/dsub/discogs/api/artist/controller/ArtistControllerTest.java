@@ -83,7 +83,7 @@ class ArtistControllerTest extends ConcurrentTest {
         Artist artist = TestUtil.getRandomArtist();
         ArtistCommand.Create command = TestUtil.getCreateCommandFrom(artist);
         ArtistDTO expected = artist.toDTO();
-        given(artistService.saveOrUpdate(command)).willReturn(Mono.just(artist.toDTO()));
+        given(artistService.upsert(command)).willReturn(Mono.just(artist.toDTO()));
 
         ResponseEntity<Mono<ArtistDTO>> responseEntity = artistController.createArtist(command);
         Mono<ArtistDTO> responseDTO = responseEntity.getBody();
@@ -92,7 +92,7 @@ class ArtistControllerTest extends ConcurrentTest {
         assertNotNull(got);
         assertEquals(expected, got);
 
-        verify(artistService, times(1)).saveOrUpdate(command);
+        verify(artistService, times(1)).upsert(command);
     }
 
     @Test

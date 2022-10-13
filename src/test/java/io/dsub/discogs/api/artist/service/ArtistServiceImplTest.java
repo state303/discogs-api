@@ -121,7 +121,7 @@ class ArtistServiceImplTest extends ConcurrentTest {
             Create createCommand = TestUtil.getCreateCommandFrom(artist);
             given(artistRepository.saveOrUpdate(createCommand)).willReturn(Mono.just(artist));
             ArtistDTO expected = artist.toDTO();
-            ArtistDTO got = artistService.saveOrUpdate(createCommand).block();
+            ArtistDTO got = artistService.upsert(createCommand).block();
             assertEquals(expected, got);
             assertNotNull(got);
             assertEquals(createCommand.getId(), artist.getId());
@@ -148,7 +148,7 @@ class ArtistServiceImplTest extends ConcurrentTest {
         ArgumentCaptor<Create> argumentCaptor =
                 ArgumentCaptor.forClass(Create.class);
 
-        StepVerifier.create(artistService.saveOrUpdate(command))
+        StepVerifier.create(artistService.upsert(command))
                 .expectErrorMessage(error)
                 .verify();
 
@@ -165,7 +165,7 @@ class ArtistServiceImplTest extends ConcurrentTest {
         ArgumentCaptor<Create> captor =
                 ArgumentCaptor.forClass(Create.class);
 
-        StepVerifier.create(artistService.saveOrUpdate(null))
+        StepVerifier.create(artistService.upsert(null))
                 .expectErrorMessage(error)
                 .verify();
 

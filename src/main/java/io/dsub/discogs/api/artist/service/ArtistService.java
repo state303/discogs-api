@@ -16,7 +16,7 @@ public interface ArtistService extends ValidatingService, PagingService {
 
     Flux<ArtistDTO> getArtists();
 
-    Mono<ArtistDTO> saveOrUpdate(Create command);
+    Mono<ArtistDTO> upsert(Create command);
 
     Mono<ArtistDTO> update(long id, Update command);
 

@@ -35,7 +35,7 @@ public class ArtistController {
 
     @PostMapping
     public ResponseEntity<Mono<ArtistDTO>> createArtist(final @RequestBody Create command) {
-        return ResponseEntity.ok(artistService.saveOrUpdate(command));
+        return ResponseEntity.ok(artistService.upsert(command));
     }
 
     @PutMapping("/{id}")
