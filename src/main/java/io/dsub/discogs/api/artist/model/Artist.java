@@ -52,7 +52,6 @@ public class Artist extends PersistableBaseEntity<Long> {
                 .dataQuality(command.getDataQuality())
                 .realName(command.getRealName())
                 .name(command.getName())
-                .lastModifiedAt(LocalDateTime.now())
                 .build();
     }
 

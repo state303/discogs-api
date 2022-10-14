@@ -1,3 +1,10 @@
 package io.dsub.discogs.api.genre.dto;
 
-public record GenreDTO(String name) {}
+import lombok.*;
+
+@With
+@Data
+@Builder
+public final class GenreDTO {
+    private final String name;
+}

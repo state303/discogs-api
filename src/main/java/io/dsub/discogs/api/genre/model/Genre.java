@@ -40,6 +40,6 @@ public class Genre extends PersistableBaseEntity<String> {
     }
 
     public GenreDTO toDTO() {
-        return new GenreDTO(getName());
+        return GenreDTO.builder().name(getName()).build();
     }
 }

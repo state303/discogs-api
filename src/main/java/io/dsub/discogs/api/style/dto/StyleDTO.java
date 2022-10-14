@@ -1,3 +1,10 @@
 package io.dsub.discogs.api.style.dto;
 
-public record StyleDTO(String name) {}
+import lombok.*;
+
+@With
+@Data
+@Builder
+public final class StyleDTO {
+    private final String name;
+}

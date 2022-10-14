@@ -47,7 +47,7 @@ public class Label extends PersistableBaseEntity<Long> {
     @Min(0)
     @Reference(Label.class)
     @Column("parent_label_id")
-    private Long parentLabelId;
+    private Long parentLabelID;
 
     public Label withMutableDataFrom(LabelCommand.Update command) {
         return Label.builder()
@@ -57,7 +57,7 @@ public class Label extends PersistableBaseEntity<Long> {
                 .profile(command.getProfile())
                 .lastModifiedAt(LocalDateTime.now())
                 .contactInfo(command.getContactInfo())
-                .parentLabelId(command.getParentLabelId())
+                .parentLabelID(command.getParentLabelId())
                 .build();
     }
 

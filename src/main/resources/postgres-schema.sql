@@ -1,9 +1,9 @@
 CREATE TABLE IF NOT EXISTS style
 (
-    name             varchar(255) NOT NULL
+    name       varchar(255) NOT NULL
         constraint pk_style
             primary key,
-    created_at       timestamp    NOT NULL
+    created_at timestamp DEFAULT now()
 );
 
 CREATE TABLE IF NOT EXISTS genre
@@ -11,16 +11,16 @@ CREATE TABLE IF NOT EXISTS genre
     name       varchar(255) NOT NULL
         constraint pk_genre
             primary key,
-    created_at timestamp    NOT NULL
+    created_at timestamp DEFAULT now()
 );
 
 CREATE TABLE IF NOT EXISTS artist
 (
-    id               integer   NOT NULL
+    id               integer NOT NULL
         constraint pk_artist
             primary key,
-    created_at       timestamp NOT NULL,
-    last_modified_at timestamp NOT NULL,
+    created_at       timestamp DEFAULT now(),
+    last_modified_at timestamp DEFAULT now(),
     data_quality     varchar(255),
     name             varchar(1000),
     profile          text,
@@ -29,11 +29,11 @@ CREATE TABLE IF NOT EXISTS artist
 
 CREATE TABLE IF NOT EXISTS label
 (
-    id               integer   NOT NULL
+    id               integer NOT NULL
         constraint pk_label
             primary key,
-    created_at       timestamp NOT NULL,
-    last_modified_at timestamp NOT NULL,
+    created_at       timestamp DEFAULT now(),
+    last_modified_at timestamp DEFAULT now(),
     contact_info     text,
     data_quality     varchar(255),
     name             varchar(255),
@@ -45,11 +45,11 @@ CREATE TABLE IF NOT EXISTS label
 
 CREATE TABLE IF NOT EXISTS master
 (
-    id               integer   NOT NULL
+    id               integer NOT NULL
         constraint pk_master
             primary key,
-    created_at       timestamp NOT NULL,
-    last_modified_at timestamp NOT NULL,
+    created_at       timestamp DEFAULT now(),
+    last_modified_at timestamp DEFAULT now(),
     data_quality     varchar(255),
     title            varchar(2000),
     year             smallint
@@ -57,11 +57,11 @@ CREATE TABLE IF NOT EXISTS master
 
 CREATE TABLE IF NOT EXISTS release
 (
-    id                  integer   NOT NULL
+    id                  integer NOT NULL
         constraint pk_release
             primary key,
-    created_at          timestamp NOT NULL,
-    last_modified_at    timestamp NOT NULL,
+    created_at          timestamp DEFAULT now(),
+    last_modified_at    timestamp DEFAULT now(),
     country             varchar(255),
     data_quality        varchar(255),
     has_valid_day       boolean,
@@ -80,7 +80,7 @@ CREATE TABLE IF NOT EXISTS release
 
 CREATE TABLE IF NOT EXISTS release_genre
 (
-    created_at timestamp    NOT NULL,
+    created_at timestamp DEFAULT now(),
     genre      varchar(255) NOT NULL
         constraint fk_release_genre_genre_genre
             references genre,
@@ -93,12 +93,12 @@ CREATE TABLE IF NOT EXISTS release_genre
 
 CREATE TABLE IF NOT EXISTS release_track
 (
-    created_at timestamp NOT NULL,
-    hash       integer   NOT NULL,
+    created_at timestamp DEFAULT now(),
+    hash       integer NOT NULL,
     duration   text,
     position   text,
     title      text,
-    release_id integer   NOT NULL
+    release_id integer NOT NULL
         constraint fk_release_track_release_id_release
             references release,
     constraint pk_release_track
@@ -107,12 +107,12 @@ CREATE TABLE IF NOT EXISTS release_track
 
 CREATE TABLE IF NOT EXISTS label_release
 (
-    created_at        timestamp NOT NULL,
+    created_at        timestamp DEFAULT now(),
     category_notation varchar(1000),
-    label_id          integer   NOT NULL
+    label_id          integer NOT NULL
         constraint fk_label_release_label_id_label
             references label,
-    release_id        integer   NOT NULL
+    release_id        integer NOT NULL
         constraint fk_label_release_release_id_release
             references release,
     constraint pk_label_release
@@ -121,14 +121,14 @@ CREATE TABLE IF NOT EXISTS label_release
 
 CREATE TABLE IF NOT EXISTS release_image
 (
-    id               uuid      NOT NULL
+    id               uuid    NOT NULL
         constraint pk_release_image
             primary key,
-    created_at       timestamp NOT NULL,
-    last_modified_at timestamp NOT NULL,
-    hash             integer   NOT NULL,
+    created_at       timestamp DEFAULT now(),
+    last_modified_at timestamp DEFAULT now(),
+    hash             integer NOT NULL,
     data             text,
-    release_id       integer   NOT NULL
+    release_id       integer NOT NULL
         constraint fk_release_image_release_id_release
             references release,
     constraint uq_release_image_release_id_hash
@@ -137,13 +137,13 @@ CREATE TABLE IF NOT EXISTS release_image
 
 CREATE TABLE IF NOT EXISTS release_contract
 (
-    created_at timestamp NOT NULL,
-    hash       integer   NOT NULL,
+    created_at timestamp DEFAULT now(),
+    hash       integer NOT NULL,
     contract   varchar(5000),
-    label_id   integer   NOT NULL
+    label_id   integer NOT NULL
         constraint fk_release_contract_label_id_label
             references label,
-    release_id integer   NOT NULL
+    release_id integer NOT NULL
         constraint fk_release_contract_release_id_release
             references release,
     constraint pk_release_contract
@@ -152,12 +152,12 @@ CREATE TABLE IF NOT EXISTS release_contract
 
 CREATE TABLE IF NOT EXISTS release_identifier
 (
-    created_at  timestamp NOT NULL,
-    hash        integer   NOT NULL,
+    created_at  timestamp DEFAULT now(),
+    hash        integer NOT NULL,
     description text,
     type        text,
     value       text,
-    release_id  integer   NOT NULL
+    release_id  integer NOT NULL
         constraint fk_release_identifier_release_id_release
             references release,
     constraint pk_release_identifier
@@ -166,12 +166,12 @@ CREATE TABLE IF NOT EXISTS release_identifier
 
 CREATE TABLE IF NOT EXISTS master_video
 (
-    created_at  timestamp NOT NULL,
-    hash        integer   NOT NULL,
+    created_at  timestamp DEFAULT now(),
+    hash        integer NOT NULL,
     description varchar(15000),
     title       varchar(1000),
     url         varchar(1000),
-    master_id   integer   NOT NULL
+    master_id   integer NOT NULL
         constraint fk_master_video_master_id_master
             references master,
     constraint pk_master_video
@@ -180,7 +180,7 @@ CREATE TABLE IF NOT EXISTS master_video
 
 CREATE TABLE IF NOT EXISTS master_genre
 (
-    created_at timestamp    NOT NULL,
+    created_at timestamp DEFAULT now(),
     genre      varchar(255) NOT NULL
         constraint fk_master_genre_genre_genre
             references genre,
@@ -193,7 +193,7 @@ CREATE TABLE IF NOT EXISTS master_genre
 
 CREATE TABLE IF NOT EXISTS master_style
 (
-    created_at timestamp    NOT NULL,
+    created_at timestamp DEFAULT now(),
     master_id  integer      NOT NULL
         constraint fk_master_style_master_id_master
             references master,
@@ -206,7 +206,7 @@ CREATE TABLE IF NOT EXISTS master_style
 
 CREATE TABLE IF NOT EXISTS release_style
 (
-    created_at timestamp    NOT NULL,
+    created_at timestamp DEFAULT now(),
     release_id integer      NOT NULL
         constraint fk_release_style_release_id_release
             references release,
@@ -219,12 +219,12 @@ CREATE TABLE IF NOT EXISTS release_style
 
 CREATE TABLE IF NOT EXISTS release_video
 (
-    created_at  timestamp NOT NULL,
-    hash        integer   NOT NULL,
+    created_at  timestamp DEFAULT now(),
+    hash        integer NOT NULL,
     description text,
     title       text,
     url         text,
-    release_id  integer   NOT NULL
+    release_id  integer NOT NULL
         constraint fk_release_video_release_id_release
             references release,
     constraint pk_release_video
@@ -233,7 +233,7 @@ CREATE TABLE IF NOT EXISTS release_video
 
 CREATE TABLE IF NOT EXISTS label_url
 (
-    created_at timestamp     NOT NULL,
+    created_at timestamp DEFAULT now(),
     hash       integer       NOT NULL,
     url        varchar(5000) NOT NULL,
     label_id   integer       NOT NULL
@@ -245,13 +245,13 @@ CREATE TABLE IF NOT EXISTS label_url
 
 CREATE TABLE IF NOT EXISTS release_format
 (
-    created_at  timestamp NOT NULL,
-    hash        integer   NOT NULL,
+    created_at  timestamp DEFAULT now(),
+    hash        integer NOT NULL,
     description varchar(10000),
     name        varchar(255),
     quantity    integer,
     text        varchar(5000),
-    release_id  integer   NOT NULL
+    release_id  integer NOT NULL
         constraint fk_release_format_release_id_release
             references release,
     constraint pk_release_format
@@ -260,11 +260,11 @@ CREATE TABLE IF NOT EXISTS release_format
 
 CREATE TABLE IF NOT EXISTS artist_alias
 (
-    created_at timestamp NOT NULL,
-    alias_id   integer   NOT NULL
+    created_at timestamp DEFAULT now(),
+    alias_id   integer NOT NULL
         constraint fk_artist_alias_alias_id_artist
             references artist,
-    artist_id  integer   NOT NULL
+    artist_id  integer NOT NULL
         constraint fk_artist_alias_artist_id_artist
             references artist,
     constraint pk_artist_alias
@@ -273,7 +273,7 @@ CREATE TABLE IF NOT EXISTS artist_alias
 
 CREATE TABLE IF NOT EXISTS artist_name_variation
 (
-    created_at     timestamp     NOT NULL,
+    created_at     timestamp DEFAULT now(),
     hash           integer       NOT NULL,
     name_variation varchar(2000) NOT NULL,
     artist_id      integer       NOT NULL
@@ -285,11 +285,11 @@ CREATE TABLE IF NOT EXISTS artist_name_variation
 
 CREATE TABLE IF NOT EXISTS master_artist
 (
-    created_at timestamp NOT NULL,
-    artist_id  integer   NOT NULL
+    created_at timestamp DEFAULT now(),
+    artist_id  integer NOT NULL
         constraint fk_master_artist_artist_id_artist
             references artist,
-    master_id  integer   NOT NULL
+    master_id  integer NOT NULL
         constraint fk_master_artist_master_id_master
             references master,
     constraint pk_master_artist
@@ -298,11 +298,11 @@ CREATE TABLE IF NOT EXISTS master_artist
 
 CREATE TABLE IF NOT EXISTS release_artist
 (
-    created_at timestamp NOT NULL,
-    artist_id  integer   NOT NULL
+    created_at timestamp DEFAULT now(),
+    artist_id  integer NOT NULL
         constraint fk_release_artist_artist_id_artist
             references artist,
-    release_id integer   NOT NULL
+    release_id integer NOT NULL
         constraint fk_release_artist_release_id_release
             references release,
     constraint pk_release_artist
@@ -311,13 +311,13 @@ CREATE TABLE IF NOT EXISTS release_artist
 
 CREATE TABLE IF NOT EXISTS release_credited_artist
 (
-    created_at timestamp NOT NULL,
-    hash       integer   NOT NULL,
+    created_at timestamp DEFAULT now(),
+    hash       integer NOT NULL,
     role       varchar(20000),
-    artist_id  integer   NOT NULL
+    artist_id  integer NOT NULL
         constraint fk_release_credited_artist_artist_id_artist
             references artist,
-    release_id integer   NOT NULL
+    release_id integer NOT NULL
         constraint fk_release_credited_artist_release_id_release
             references release,
     constraint pk_release_credited_artist
@@ -326,7 +326,7 @@ CREATE TABLE IF NOT EXISTS release_credited_artist
 
 CREATE TABLE IF NOT EXISTS artist_url
 (
-    created_at timestamp     NOT NULL,
+    created_at timestamp DEFAULT now(),
     hash       integer       NOT NULL,
     url        varchar(5000) NOT NULL,
     artist_id  integer       NOT NULL
@@ -338,11 +338,11 @@ CREATE TABLE IF NOT EXISTS artist_url
 
 CREATE TABLE IF NOT EXISTS artist_group
 (
-    created_at timestamp NOT NULL,
-    artist_id  integer   NOT NULL
+    created_at timestamp DEFAULT now(),
+    artist_id  integer NOT NULL
         constraint fk_artist_group_artist_id_artist
             references artist,
-    group_id   integer   NOT NULL
+    group_id   integer NOT NULL
         constraint fk_artist_group_group_id_artist
             references artist
 );

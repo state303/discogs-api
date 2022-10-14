@@ -7,7 +7,7 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-public final class LabelCommand {
+public abstract class LabelCommand {
     @Getter
     @AllArgsConstructor
     public static class Create {

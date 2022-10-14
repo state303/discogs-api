@@ -8,8 +8,8 @@ import reactor.core.publisher.Mono;
 
 @Repository
 public interface GenreRepository extends R2dbcRepository<Genre, String> {
-    @Query("INSERT INTO genre(name, created_at) " +
-            "VALUES (:#{[0].name}, now()) " +
+    @Query("INSERT INTO genre(name) " +
+            "VALUES (:#{[0].name}) " +
             "ON CONFLICT (name) DO NOTHING")
     Mono<Genre> saveOrUpdate(Genre genre);
 }

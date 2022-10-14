@@ -27,7 +27,6 @@ public class StyleServiceImpl implements StyleService {
     private final Function<StyleCommand.Create, Mono<Style>> createCommandToStyleMono =
             cmd -> Mono.just(Style.builder()
                     .name(cmd.getName())
-                    .createdAt(LocalDateTime.now())
                     .build());
 
     @Override

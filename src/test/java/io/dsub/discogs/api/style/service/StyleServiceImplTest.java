@@ -51,7 +51,7 @@ class StyleServiceImplTest extends ConcurrentTest {
     void findAllReturnsAllItem() {
         List<Style> styles = getStyles(5);
         assertEquals(5, styles.size());
-        Iterator<StyleDTO> iter = styles.stream().map(s -> new StyleDTO(s.getName())).iterator();
+        Iterator<StyleDTO> iter = styles.stream().map(Style::toDTO).iterator();
         given(styleRepository.findAll()).willReturn(Flux.fromIterable(styles));
 
         StepVerifier.create(styleService.findAll())
@@ -138,9 +138,8 @@ class StyleServiceImplTest extends ConcurrentTest {
     void saveCallsRepositorySave() {
         var style = getStyle();
         var createCommand = new StyleCommand.Create(style.getName());
-        var dto = new StyleDTO(style.getName());
+        var dto = style.toDTO();
         var captor = ArgumentCaptor.forClass(Style.class);
-        var begin = LocalDateTime.now();
 
         given(validator.validate(createCommand)).willReturn(Mono.just(createCommand));
         given(styleRepository.saveOrUpdate(captor.capture())).willReturn(Mono.just(style));
@@ -152,7 +151,7 @@ class StyleServiceImplTest extends ConcurrentTest {
         verify(validator, times(1)).validate(createCommand);
         verify(styleRepository, times(1)).saveOrUpdate(any());
 
-        assertThat(captor.getValue().getCreatedAt()).isAfter(begin);
+        assertThat(captor.getValue().getName()).isEqualTo(style.getName());
     }
 
     @Test
@@ -178,7 +177,7 @@ class StyleServiceImplTest extends ConcurrentTest {
     void deleteCallsRepositoryDelete() {
         final Style style = getStyle();
         final StyleCommand.Delete cmd = new StyleCommand.Delete(style.getName());
-        final StyleDTO dto = new StyleDTO(style.getName());
+        final StyleDTO dto = style.toDTO();
         assertNotNull(dto);
 
         given(validator.validate(cmd)).willReturn(Mono.just(cmd));
@@ -194,6 +193,6 @@ class StyleServiceImplTest extends ConcurrentTest {
     }
 
     private Style getStyle() {
-        return new Style(TestUtil.getRandomString(), LocalDateTime.now());
+        return Style.builder().name(TestUtil.getRandomString()).build();
     }
 }

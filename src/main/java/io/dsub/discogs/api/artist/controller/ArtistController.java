@@ -25,7 +25,7 @@ public class ArtistController {
 
     @GetMapping
     public ResponseEntity<Mono<Page<ArtistDTO>>> getArtistsByPage(final @PageableDefault Pageable page) {
-        return ResponseEntity.ok(artistService.getArtists(page));
+        return ResponseEntity.ok(artistService.findAllByPage(page));
     }
 
     @GetMapping("/{id}")

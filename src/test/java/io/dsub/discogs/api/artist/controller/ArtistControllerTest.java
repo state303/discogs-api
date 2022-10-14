@@ -16,6 +16,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 import java.util.List;
 
@@ -42,7 +43,7 @@ class ArtistControllerTest extends ConcurrentTest {
     void getArtistsByPageReturnsDelegatedResult() {
         Pageable pageable = PageRequest.of(3, 10);
         Page<ArtistDTO> expected = new PageImpl<>(List.of());
-        given(artistService.getArtists(pageable)).willReturn(Mono.just(expected));
+        given(artistService.findAllByPage(pageable)).willReturn(Mono.just(expected));
 
         ResponseEntity<Mono<Page<ArtistDTO>>> response = artistController.getArtistsByPage(pageable);
 
@@ -55,18 +56,20 @@ class ArtistControllerTest extends ConcurrentTest {
         assertEquals(expected, got);
         assertEquals(expected.getTotalElements(), 0);
 
-        verify(artistService, times(1)).getArtists(pageable);
+        verify(artistService, times(1)).findAllByPage(pageable);
     }
 
     @Test
-    void getArtistByIdCallsService() {
-        long id = TestUtil.getRandomIndexValue();
-        Artist artist = TestUtil.getRandomArtist(id);
-        ArtistDTO expected = artist.toDTO();
-        assertNotNull(expected);
+    void findByIDCallsService() {
+        var artist = getRandomArtist();
+        var expected = artist.toDTO();
 
-        given(artistService.findById(id)).willReturn(Mono.just(artist.toDTO()));
-        ResponseEntity<Mono<ArtistDTO>> response = artistController.getArtistById(id);
+        var artistID = artist.getId();
+        assertNotNull(expected);
+        assertNotNull(artistID);
+
+        given(artistService.findById(artistID)).willReturn(Mono.just(artist.toDTO()));
+        ResponseEntity<Mono<ArtistDTO>> response = artistController.getArtistById(artistID);
 
         Mono<ArtistDTO> responseDtoMono = response.getBody();
         assertNotNull(responseDtoMono);
@@ -75,13 +78,13 @@ class ArtistControllerTest extends ConcurrentTest {
         assertNotNull(got);
         assertEquals(expected, got);
 
-        verify(artistService, times(1)).findById(id);
+        verify(artistService, times(1)).findById(artistID);
     }
 
     @Test
     void createArtistCallsService() {
-        Artist artist = TestUtil.getRandomArtist();
-        ArtistCommand.Create command = TestUtil.getCreateCommandFrom(artist);
+        Artist artist = getRandomArtist();
+        ArtistCommand.Create command = getCreateCommandFrom(artist);
         ArtistDTO expected = artist.toDTO();
         given(artistService.upsert(command)).willReturn(Mono.just(artist.toDTO()));
 
@@ -97,27 +100,24 @@ class ArtistControllerTest extends ConcurrentTest {
 
     @Test
     void updateArtistCallsService() {
-        int id = TestUtil.getRandomIndexValue();
-        Artist artist = TestUtil.getRandomArtist(id);
-        Artist other = TestUtil.getRandomArtist(id);
+        var id = TestUtil.getRandomIndexValue();
+        var artist = getRandomArtist(id);
 
-        ArtistCommand.Update command = TestUtil.getUpdateCommandFrom(artist);
-        Mono<ArtistDTO> expectedMono = Mono.just(artist.withMutableDataFrom(command).toDTO());
+        var command = getUpdateCommandFrom(artist);
+        var expected = artist.withMutableDataFrom(command).toDTO();
+        var expectedMono = Mono.just(expected);
+
         given(artistService.update(id, command)).willReturn(expectedMono);
 
-        ResponseEntity<Mono<ArtistDTO>> response = artistController.updateArtist(artist.getId(), command);
-        Mono<ArtistDTO> responseDTO = response.getBody();
-        assertNotNull(responseDTO);
-        ArtistDTO got = responseDTO.block();
-        ArtistDTO expected = expectedMono.block();
+        var response = artistController.updateArtist(artist.getId(), command);
+        assertNotNull(response);
 
-        assertNotNull(got);
-        assertNotNull(expected);
-        assertEquals(id, got.id());
-        assertEquals(expected.name(), got.name());
-        assertEquals(expected.profile(), got.profile());
-        assertEquals(expected.realName(), got.realName());
-        assertEquals(expected.dataQuality(), got.dataQuality());
+        var responseBody = response.getBody();
+        assertNotNull(responseBody);
+
+        StepVerifier.create(responseBody)
+                .expectNext(expected)
+                .verifyComplete();
 
         verify(artistService, times(1)).update(id, command);
     }
@@ -135,5 +135,38 @@ class ArtistControllerTest extends ConcurrentTest {
         assertEquals(voidMono, gotMono);
 
         verify(artistService, times(1)).delete(id);
+    }
+
+    private Artist getRandomArtist() {
+        return getRandomArtist(TestUtil.getRandomIndexValue());
+    }
+
+    private Artist getRandomArtist(long id) {
+        return Artist.builder()
+                .id(id)
+                .name(TestUtil.getRandomString())
+                .realName(TestUtil.getRandomString())
+                .profile(TestUtil.getRandomString())
+                .dataQuality(TestUtil.getRandomString())
+                .build();
+    }
+
+    private ArtistCommand.Create getCreateCommandFrom(Artist artist) {
+        return ArtistCommand.Create.builder()
+                .id(artist.getId())
+                .name(artist.getName())
+                .realName(artist.getRealName())
+                .profile(artist.getProfile())
+                .dataQuality(artist.getDataQuality())
+                .build();
+    }
+
+    private ArtistCommand.Update getUpdateCommandFrom(Artist artist) {
+        return ArtistCommand.Update.builder()
+                .name(artist.getName())
+                .realName(artist.getRealName())
+                .profile(artist.getProfile())
+                .dataQuality(artist.getDataQuality())
+                .build();
     }
 }

@@ -1,7 +1,6 @@
 package io.dsub.discogs.api.style.command;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -9,8 +8,10 @@ import javax.validation.constraints.Size;
 
 public abstract class StyleCommand {
 
+    @With
     @Getter
-    @RequiredArgsConstructor
+    @Builder
+    @AllArgsConstructor
     public static class Create extends StyleCommand {
         @NotNull
         @NotBlank
@@ -18,8 +19,10 @@ public abstract class StyleCommand {
         private final String name;
     }
 
+    @With
     @Getter
-    @RequiredArgsConstructor
+    @Builder
+    @AllArgsConstructor
     public static class Delete extends StyleCommand {
         @NotNull
         @NotBlank

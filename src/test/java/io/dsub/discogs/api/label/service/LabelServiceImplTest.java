@@ -51,7 +51,7 @@ class LabelServiceImplTest extends ConcurrentTest {
         List<Label> labels = getLabels(10);
         given(labelRepository.findAll()).willReturn(Flux.fromIterable(labels));
         LabelDTO[] expected = arrayFromCollection(labels);
-        StepVerifier.create(labelService.getLabels())
+        StepVerifier.create(labelService.findAll())
                 .expectNext(expected)
                 .verifyComplete();
         verify(labelRepository, times(1)).findAll();
@@ -60,7 +60,7 @@ class LabelServiceImplTest extends ConcurrentTest {
     @Test
     void getLabelsReturnsEmptyFlux() {
         given(labelRepository.findAll()).willReturn(Flux.empty());
-        StepVerifier.create(labelService.getLabels()).verifyComplete();
+        StepVerifier.create(labelService.findAll()).verifyComplete();
         verify(labelRepository, times(1)).findAll();
     }
 
@@ -74,7 +74,7 @@ class LabelServiceImplTest extends ConcurrentTest {
         given(labelRepository.findAll(pageable.getSort())).willReturn(Flux.fromIterable(labels));
         given(labelRepository.count()).willReturn(Mono.just((long) 10));
 
-        StepVerifier.create(labelService.getLabels(pageable))
+        StepVerifier.create(labelService.findAllByPage(pageable))
                 .expectNext(expectedPage)
                 .verifyComplete();
 
@@ -86,7 +86,7 @@ class LabelServiceImplTest extends ConcurrentTest {
         LabelCommand.Update command = Mockito.mock(LabelCommand.Update.class);
         given(validator.validate(command)).willReturn(Mono.empty());
 
-        StepVerifier.create(labelService.updateLabel(10L, command))
+        StepVerifier.create(labelService.update(10L, command))
                 .verifyError(ItemNotFoundException.class);
 
         verify(validator, times(1)).validate(command);
@@ -102,7 +102,7 @@ class LabelServiceImplTest extends ConcurrentTest {
         given(validator.validate(command)).willReturn(Mono.just(command));
         given(labelRepository.findById(id)).willReturn(Mono.empty());
 
-        StepVerifier.create(labelService.updateLabel(id, command))
+        StepVerifier.create(labelService.update(id, command))
                 .verifyError(ItemNotFoundException.class);
 
         verify(validator, times(1)).validate(command);
@@ -127,7 +127,7 @@ class LabelServiceImplTest extends ConcurrentTest {
         assertNotNull(label);
         assertNotNull(command);
 
-        StepVerifier.create(labelService.updateLabel(id, command))
+        StepVerifier.create(labelService.update(id, command))
                 .expectNext(dto)
                 .verifyComplete();
 
@@ -149,7 +149,7 @@ class LabelServiceImplTest extends ConcurrentTest {
         given(validator.validate(command)).willReturn(Mono.just(command));
         given(labelRepository.saveOrUpdate(captor.capture())).willReturn(Mono.just(label));
 
-        StepVerifier.create(labelService.saveOrUpdate(command))
+        StepVerifier.create(labelService.upsert(command))
                 .expectNext(dto)
                 .verifyComplete();
 
@@ -167,7 +167,7 @@ class LabelServiceImplTest extends ConcurrentTest {
         given(validator.validate(createCommand)).willReturn(Mono.just(createCommand));
         given(labelRepository.saveOrUpdate(captor.capture())).willReturn(Mono.just(label));
 
-        StepVerifier.create(labelService.saveOrUpdate(createCommand))
+        StepVerifier.create(labelService.upsert(createCommand))
                 .expectNext(dto)
                 .verifyComplete();
 
@@ -181,7 +181,7 @@ class LabelServiceImplTest extends ConcurrentTest {
     void deleteLabelCallsRepository() {
         long id = TestUtil.getRandomIndexValue();
         given(labelRepository.deleteById(id)).willReturn(Mono.empty());
-        StepVerifier.create(labelService.deleteLabel(id)).verifyComplete();
+        StepVerifier.create(labelService.delete(id)).verifyComplete();
         verify(labelRepository, times(1)).deleteById(id);
     }
 
@@ -224,7 +224,7 @@ class LabelServiceImplTest extends ConcurrentTest {
                 label.getProfile(),
                 label.getDataQuality(),
                 label.getContactInfo(),
-                label.getParentLabelId());
+                label.getParentLabelID());
     }
 
     private LabelCommand.Create getCreateCommandFrom(Label label) {
@@ -233,7 +233,7 @@ class LabelServiceImplTest extends ConcurrentTest {
                 label.getProfile(),
                 label.getDataQuality(),
                 label.getContactInfo(),
-                label.getParentLabelId());
+                label.getParentLabelID());
     }
 
     private Label randomLabel(long id) {
@@ -245,7 +245,7 @@ class LabelServiceImplTest extends ConcurrentTest {
                 .profile(TestUtil.getRandomString())
                 .contactInfo(TestUtil.getRandomString())
                 .dataQuality(TestUtil.getRandomString())
-                .parentLabelId((long) TestUtil.getRandomIndexValue())
+                .parentLabelID((long) TestUtil.getRandomIndexValue())
                 .build();
     }
 }

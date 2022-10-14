@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.function.Function;
 
@@ -37,22 +36,22 @@ public class LabelServiceImpl implements LabelService {
                             .contactInfo(tuple.getT1().getContactInfo())
                             .profile(tuple.getT1().getProfile())
                             .dataQuality(tuple.getT1().getDataQuality())
-                            .parentLabelId(tuple.getT1().getParentLabelId())
+                            .parentLabelID(tuple.getT1().getParentLabelId())
                             .build()));
 
     @Override
-    public Flux<LabelDTO> getLabels() {
+    public Flux<LabelDTO> findAll() {
         return labelRepository.findAll().flatMap(toDTO);
     }
 
     @Override
-    public Mono<Page<LabelDTO>> getLabels(Pageable pageable) {
+    public Mono<Page<LabelDTO>> findAllByPage(Pageable pageable) {
         Flux<LabelDTO> sortedDTOs = labelRepository.findAll(pageable.getSort()).flatMap(toDTO);
         return getPagedResult(count(), pageable, sortedDTOs);
     }
 
     @Override
-    public Mono<LabelDTO> updateLabel(long id, LabelCommand.Update command) {
+    public Mono<LabelDTO> update(long id, LabelCommand.Update command) {
         return validate(command)
                 .flatMap(cmd -> labelRepository.findById(id))
                 .flatMap(label -> Mono.just(label.withMutableDataFrom(command)))
@@ -62,7 +61,7 @@ public class LabelServiceImpl implements LabelService {
     }
 
     @Override
-    public Mono<LabelDTO> saveOrUpdate(LabelCommand.Create command) {
+    public Mono<LabelDTO> upsert(LabelCommand.Create command) {
         return validate(command)
                 .flatMap(createCommandToLabelMono)
                 .flatMap(labelRepository::saveOrUpdate)
@@ -70,7 +69,7 @@ public class LabelServiceImpl implements LabelService {
     }
 
     @Override
-    public Mono<Void> deleteLabel(long id) {
+    public Mono<Void> delete(long id) {
         return labelRepository.deleteById(id);
     }
 

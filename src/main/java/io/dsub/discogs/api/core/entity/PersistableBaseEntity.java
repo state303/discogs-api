@@ -6,7 +6,6 @@ import org.springframework.data.domain.Persistable;
 
 public abstract class PersistableBaseEntity<T> implements Persistable<T> {
     @Transient
-    @Builder.Default
     protected boolean isNew = false;
 
     @Override

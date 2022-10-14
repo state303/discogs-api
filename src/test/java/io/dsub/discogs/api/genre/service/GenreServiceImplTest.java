@@ -51,7 +51,7 @@ class GenreServiceImplTest extends ConcurrentTest {
     @Test
     void findAllReturnsAllItems() {
         List<Genre> genres = getGenres(3);
-        Iterator<GenreDTO> iter = genres.stream().map(Genre::getName).map(GenreDTO::new).iterator();
+        Iterator<GenreDTO> iter = genres.stream().map(Genre::toDTO).iterator();
         given(genreRepository.findAll()).willReturn(Flux.fromIterable(genres));
 
         StepVerifier.create(genreService.findAll())
@@ -81,7 +81,7 @@ class GenreServiceImplTest extends ConcurrentTest {
         given(genreRepository.findAll(captor.capture())).willReturn(genreFlux);
         given(genreRepository.count()).willReturn(Mono.just((long) size));
 
-        Mono<Page<GenreDTO>> result = genreService.findAll(pageable);
+        Mono<Page<GenreDTO>> result = genreService.findAllByPage(pageable);
         assertNotNull(result);
 
         Page<GenreDTO> page = result.block();
@@ -103,7 +103,7 @@ class GenreServiceImplTest extends ConcurrentTest {
         given(genreRepository.findAll(captor.capture())).willReturn(emptyGenreFlux);
         given(genreRepository.count()).willReturn(Mono.just((long) 0));
 
-        Mono<Page<GenreDTO>> result = genreService.findAll(pageable);
+        Mono<Page<GenreDTO>> result = genreService.findAllByPage(pageable);
         assertNotNull(result);
         final Page<GenreDTO> page = result.block();
         assertNotNull(page);
@@ -138,9 +138,8 @@ class GenreServiceImplTest extends ConcurrentTest {
     void saveCallsRepositorySave() {
         final var genre = getGenre();
         final var createCommand = new GenreCommand.Create(genre.getName());
-        final var dto = new GenreDTO(genre.getName());
+        final var dto = genre.toDTO();
         assertNotNull(dto);
-        final var begin = LocalDateTime.now();
         final var captor = ArgumentCaptor.forClass(Genre.class);
 
         given(validator.validate(createCommand))
@@ -155,9 +154,7 @@ class GenreServiceImplTest extends ConcurrentTest {
         verify(validator, times(1)).validate(createCommand);
         verify(genreRepository, times(1)).saveOrUpdate(any());
 
-        var got = captor.getValue();
-        assertEquals(genre.getName(), got.getName());
-        assertThat(got.getCreatedAt()).isAfter(begin);
+        assertEquals(genre.getName(), captor.getValue().getName());
     }
 
     @Test
@@ -184,7 +181,7 @@ class GenreServiceImplTest extends ConcurrentTest {
     void deleteCallsRepositorySave() {
         final Genre genre = getGenre();
         final GenreCommand.Delete cmd = new GenreCommand.Delete(genre.getName());
-        final GenreDTO dto = new GenreDTO(genre.getName());
+        final GenreDTO dto = genre.toDTO();
         assertNotNull(dto);
 
         given(validator.validate(cmd)).willReturn(Mono.just(cmd));
@@ -200,6 +197,6 @@ class GenreServiceImplTest extends ConcurrentTest {
         return IntStream.range(0, size).mapToObj(i -> getGenre()).toList();
     }
     private Genre getGenre() {
-        return new Genre(TestUtil.getRandomString(), LocalDateTime.now());
+        return Genre.builder().name(TestUtil.getRandomString()).build();
     }
 }

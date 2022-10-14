@@ -1,7 +1,7 @@
 package io.dsub.discogs.api.artist.service;
 
+import io.dsub.discogs.api.artist.command.ArtistCommand;
 import io.dsub.discogs.api.artist.command.ArtistCommand.Create;
-import io.dsub.discogs.api.artist.command.ArtistCommand.Update;
 import io.dsub.discogs.api.artist.dto.ArtistDTO;
 import io.dsub.discogs.api.artist.model.Artist;
 import io.dsub.discogs.api.artist.repository.ArtistRepository;
@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.time.LocalDateTime;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -24,49 +23,37 @@ import java.util.function.Predicate;
 @RequiredArgsConstructor
 public class ArtistServiceImpl implements ArtistService {
     private final ArtistRepository artistRepository;
-
     private final Validator validator;
     private final Function<Artist, Mono<ArtistDTO>> toDTO = artist -> Mono.just(artist.toDTO());
     private final Predicate<Long> greaterThanZero = i -> i > 0;
-    private final Function<Create, Mono<Artist>> createCommandToArtistMono = create -> Mono.just(create)
-            .zipWith(Mono.just(LocalDateTime.now()))
-            .flatMap(tuple -> Mono.just(Artist.builder()
-                    .id(tuple.getT1().getId())
-                    .createdAt(tuple.getT2())
-                    .lastModifiedAt(tuple.getT2())
-                    .name(tuple.getT1().getName())
-                    .realName(tuple.getT1().getRealName())
-                    .profile(tuple.getT1().getProfile())
-                    .dataQuality(tuple.getT1().getDataQuality())
-                    .build()));
 
     @Override
-    public Mono<Page<ArtistDTO>> getArtists(Pageable pageable) {
+    public Mono<Page<ArtistDTO>> findAllByPage(Pageable pageable) {
         Flux<ArtistDTO> sortedDTOs = artistRepository.findAll(pageable.getSort()).flatMap(toDTO);
         return getPagedResult(count(), pageable, sortedDTOs);
     }
 
     @Override
-    public Flux<ArtistDTO> getArtists() {
-        return artistRepository.findAll().flatMap(toDTO);
+    public Mono<ArtistDTO> update(long id, ArtistCommand.Update command) {
+        return validate(command)
+                .flatMap(cmd -> artistRepository.findById(id))
+                .flatMap(artist -> Mono.just(artist.withMutableDataFrom(command)))
+                .flatMap(artistRepository::save)
+                .flatMap(toDTO)
+                .switchIfEmpty(Mono.error(ItemNotFoundException.getInstance()));
     }
 
     @Override
-    public Mono<ArtistDTO> upsert(Create command) {
+    public Mono<ArtistDTO> upsert(ArtistCommand.Create command) {
         return validate(command)
-                .flatMap(createCommandToArtistMono)
+                .flatMap(Create::toEntity)
                 .flatMap(artistRepository::saveOrUpdate)
                 .flatMap(toDTO);
     }
 
     @Override
-    public Mono<ArtistDTO> update(long id, Update command) {
-        return validate(command)
-                .then(artistRepository.findById(id))
-                .flatMap(artist -> Mono.just(artist.withMutableDataFrom(command)))
-                .flatMap(artistRepository::save)
-                .flatMap(toDTO)
-                .switchIfEmpty(Mono.error(ItemNotFoundException.getInstance()));
+    public Flux<ArtistDTO> findAll() {
+        return artistRepository.findAll().flatMap(toDTO);
     }
 
     @Override

@@ -3,7 +3,6 @@ package io.dsub.discogs.api.artist.service;
 import io.dsub.discogs.api.artist.dto.ArtistDTO;
 import io.dsub.discogs.api.artist.model.Artist;
 import io.dsub.discogs.api.artist.repository.ArtistRepository;
-import io.dsub.discogs.api.label.model.Label;
 import io.dsub.discogs.api.test.ConcurrentTest;
 import io.dsub.discogs.api.test.util.TestUtil;
 import io.dsub.discogs.api.validator.Validator;
@@ -26,9 +25,7 @@ import reactor.test.StepVerifier;
 import java.time.LocalDateTime;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static io.dsub.discogs.api.artist.command.ArtistCommand.Create;
 import static io.dsub.discogs.api.artist.command.ArtistCommand.Update;
@@ -58,17 +55,16 @@ class ArtistServiceImplTest extends ConcurrentTest {
     void getArtistsCallsRepository() {
         Flux<Artist> emptyArtistFlux = Flux.empty();
         given(artistRepository.findAll()).willReturn(emptyArtistFlux);
-        StepVerifier.create(artistService.getArtists()).verifyComplete();
+        StepVerifier.create(artistService.findAll()).verifyComplete();
         verify(artistRepository, times(1)).findAll();
     }
 
     @Test
     void getArtistsReturnsAllItems() {
-        List<Artist> artists = TestUtil.getRandomArtists(3).collectList().block();
-        assertNotNull(artists);
-        Iterator<ArtistDTO> iter = artists.stream().map(Artist::toDTO).toList().iterator();
+        var artists = IntStream.range(0, 3).mapToObj(i -> TestUtil.getInstanceOf(Artist.class)).toList();
+        var iter = artists.stream().map(Artist::toDTO).toList().iterator();
         given(artistRepository.findAll()).willReturn(Flux.fromIterable(artists));
-        StepVerifier.create(artistService.getArtists())
+        StepVerifier.create(artistService.findAll())
                 .expectNext(iter.next())
                 .expectNext(iter.next())
                 .expectNext(iter.next())
@@ -82,7 +78,7 @@ class ArtistServiceImplTest extends ConcurrentTest {
         given(artistRepository.findAll(pageRequest.getSort())).willReturn(Flux.empty());
         given(artistRepository.count()).willReturn(Mono.just((long) 0));
 
-        Page<ArtistDTO> page = artistService.getArtists(pageRequest).block();
+        Page<ArtistDTO> page = artistService.findAllByPage(pageRequest).block();
 
         assertNotNull(page);
         assertEquals(0, page.getTotalElements());
@@ -92,16 +88,12 @@ class ArtistServiceImplTest extends ConcurrentTest {
     @Test
     void getArtistsByPageAndSizeWithSomeArtists() {
         Pageable pageRequest = PageRequest.of(0, 5);
-        List<Artist> artists = TestUtil.getRandomArtists(5).collectList().block();
-
-        assertNotNull(artists);
-
+        var artists = IntStream.range(0, 5).mapToObj(i -> TestUtil.getInstanceOf(Artist.class)).toList();
         given(artistRepository.findAll(pageRequest.getSort())).willReturn(Flux.fromIterable(artists));
         given(artistRepository.count()).willReturn(Mono.just((long) 5));
 
-
         Iterator<Artist> artistIterator = artists.iterator();
-        Page<ArtistDTO> page = artistService.getArtists(pageRequest).block();
+        Page<ArtistDTO> page = artistService.findAllByPage(pageRequest).block();
 
         assertNotNull(page);
         assertEquals(5, page.getTotalElements());
@@ -111,31 +103,6 @@ class ArtistServiceImplTest extends ConcurrentTest {
             ArtistDTO expected = artistIterator.next().toDTO();
             assertEquals(expected, got);
         });
-    }
-
-    @Test
-    void insertOrUpdateInsertsAllItems() {
-        List<Artist> artists = TestUtil.getRandomArtists(5).collectList().block();
-        assertNotNull(artists);
-
-        AtomicInteger found = new AtomicInteger(0);
-        ArgumentCaptor<Artist> captor = ArgumentCaptor.forClass(Artist.class);
-
-        artists.forEach(artist -> {
-            var begin = LocalDateTime.now();
-            given(artistRepository.saveOrUpdate(captor.capture())).willReturn(Mono.just(artist));
-
-            var cmd = TestUtil.getCreateCommandFrom(artist);
-            StepVerifier.create(artistService.upsert(cmd))
-                    .expectNext(artist.toDTO())
-                    .verifyComplete();
-            found.addAndGet(1);
-
-            var arg = captor.getValue();
-            assertThat(arg.getCreatedAt()).isAfter(begin);
-            assertThat(arg.getLastModifiedAt()).isEqualTo(arg.getCreatedAt());
-        });
-        assertEquals(5, found.get());
     }
 
     @Test
@@ -177,29 +144,29 @@ class ArtistServiceImplTest extends ConcurrentTest {
 
     @Test
     void updateCallsRepositoryUpdate() {
-        long id = TestUtil.getRandomIndexValue();
-        Artist artist = TestUtil.getRandomArtist(id);
-        Update cmd = new Update("a", "b", "c", "d");
+        var artist = TestUtil.getInstanceOf(Artist.class);
+        var id = artist.getId();
+        assertNotNull(id);
 
+        Update cmd = new Update("a", "b", "c", "d");
         var captor = ArgumentCaptor.forClass(Artist.class);
-        var begin = LocalDateTime.now();
+        var expectedReceived = artist.withMutableDataFrom(cmd);
 
         given(artistRepository.findById(id))
                 .willReturn(Mono.just(artist));
         given(artistRepository.save(captor.capture()))
                 .willReturn(Mono.just(artist.withMutableDataFrom(cmd)));
 
-        var resultDTO = artistService.update(id, cmd);
-        var got = resultDTO.block();
+        StepVerifier.create(artistService.update(id, cmd))
+                .expectNextMatches(dto -> dto != null &&
+                        dto.getName().equals("a") &&
+                        dto.getRealName().equals("b") &&
+                        dto.getProfile().equals("c") &&
+                        dto.getDataQuality().equals("d"))
+                .verifyComplete();
 
-        assertNotNull(got);
-        assertEquals("a", got.name());
-        assertEquals("b", got.realName());
-        assertEquals("c", got.profile());
-        assertEquals("d", got.dataQuality());
-
-        var gotArtist = captor.getValue();
-        assertThat(gotArtist.getLastModifiedAt()).isAfter(begin);
+        var received = captor.getValue();
+        assertThat(received).isEqualTo(expectedReceived);
     }
 
     @Test
@@ -222,8 +189,10 @@ class ArtistServiceImplTest extends ConcurrentTest {
 
     @Test
     void findByIdReturnsValidItem() {
-        long id = TestUtil.getRandomIndexValue();
-        Artist artist = TestUtil.getRandomArtist(id);
+        Artist artist = TestUtil.getInstanceOf(Artist.class);
+        assertNotNull(artist);
+        Long id = artist.getId();
+        assertNotNull(id);
 
         var captor = ArgumentCaptor.forClass(Long.class);
         given(artistRepository.findById(captor.capture())).willReturn(Mono.just(artist));
@@ -234,11 +203,5 @@ class ArtistServiceImplTest extends ConcurrentTest {
         assertEquals(expected, got);
 
         assertEquals(artist.getId(), captor.getValue());
-    }
-
-    private Map<Long, Artist> getArtistsByMap() {
-        return TestUtil.getRandomArtists(30)
-                .toStream()
-                .collect(Collectors.toConcurrentMap(Artist::getId, artist -> artist));
     }
 }

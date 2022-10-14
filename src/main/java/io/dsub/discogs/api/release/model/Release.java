@@ -1,6 +1,7 @@
 package io.dsub.discogs.api.release.model;
 
 import io.dsub.discogs.api.core.entity.PersistableBaseEntity;
+import io.dsub.discogs.api.release.command.ReleaseCommand;
 import io.dsub.discogs.api.release.dto.ReleaseDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -59,8 +60,8 @@ public class Release extends PersistableBaseEntity<Long> {
     @Column("release_date")
     private LocalDate releaseDate;
 
-    @Column("release_date_reported")
-    private String releaseDateReported;
+    @Column("listed_release_date")
+    private String listedReleaseDate;
 
     @Column("status")
     private String status;
@@ -80,9 +81,18 @@ public class Release extends PersistableBaseEntity<Long> {
                 .isMaster(isMaster)
                 .notes(notes)
                 .releaseDate(releaseDate)
-                .releaseDateReported(releaseDateReported)
+                .listedReleaseDate(listedReleaseDate)
                 .status(status)
                 .title(title)
+                .build();
+    }
+
+    public static Release fromCreateCommand(ReleaseCommand.Create command) {
+        return Release.builder()
+                .id(command.getId())
+                .country(command.getCountry())
+                .dataQuality(command.getDataQuality())
+                .listedReleaseDate(command.getReleaseDate())
                 .build();
     }
 }

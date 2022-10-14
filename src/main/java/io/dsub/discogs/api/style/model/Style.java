@@ -37,6 +37,6 @@ public class Style extends PersistableBaseEntity<String> {
     }
 
     public StyleDTO toDTO() {
-        return new StyleDTO(getName());
+        return StyleDTO.builder().name(getName()).build();
     }
 }

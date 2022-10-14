@@ -1,7 +1,6 @@
 package io.dsub.discogs.api.genre.command;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
@@ -9,8 +8,11 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 public abstract class GenreCommand {
+
+    @With
     @Getter
-    @RequiredArgsConstructor
+    @Builder
+    @AllArgsConstructor
     public static class Create extends GenreCommand {
         @NotNull
         @NotBlank
@@ -18,8 +20,10 @@ public abstract class GenreCommand {
         private final String name;
     }
 
+    @With
     @Getter
-    @RequiredArgsConstructor
+    @Builder
+    @AllArgsConstructor
     public static class Delete extends GenreCommand {
         @NotNull
         @NotBlank

@@ -1,14 +1,18 @@
 package io.dsub.discogs.api.release.command;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.With;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 public abstract class ReleaseCommand {
+    @With
     @Getter
+    @Builder
     @AllArgsConstructor
     public static final class Create {
         @Min(0)
@@ -30,7 +34,9 @@ public abstract class ReleaseCommand {
         private final Boolean isMaster;
     }
 
+    @With
     @Getter
+    @Builder
     @AllArgsConstructor
     public static final class Update {
         @Min(0)

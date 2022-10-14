@@ -27,6 +27,6 @@ public class GenreController {
 
     @GetMapping
     public ResponseEntity<Mono<Page<GenreDTO>>> genres(@PageableDefault Pageable pageable) {
-        return ResponseEntity.ok(genreService.findAll(pageable));
+        return ResponseEntity.ok(genreService.findAllByPage(pageable));
     }
 }

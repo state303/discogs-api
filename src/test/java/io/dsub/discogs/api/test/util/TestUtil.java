@@ -1,10 +1,5 @@
 package io.dsub.discogs.api.test.util;
 
-import io.dsub.discogs.api.artist.command.ArtistCommand;
-import io.dsub.discogs.api.artist.model.Artist;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import javax.validation.Path;
@@ -12,65 +7,97 @@ import javax.validation.Validator;
 import javax.validation.executable.ExecutableValidator;
 import javax.validation.metadata.BeanDescriptor;
 import javax.validation.metadata.ConstraintDescriptor;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Parameter;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import java.util.stream.Stream;
 
 public class TestUtil {
 
     public static final Random RANDOM = new Random();
 
+    public static <T> T getInstanceOf(Class<T> clazz) {
+        return instantiate(clazz);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T> T instantiate(Class<T> clazz) {
+        T instance = null;
+        for (Constructor<?> constructor : clazz.getConstructors()) {
+            if (!constructor.trySetAccessible()) {
+                continue;
+            }
+            try {
+                var initArgs = getInitArgs(constructor);
+                instance = (T) constructor.newInstance(initArgs);
+            } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
+                throw new RuntimeException("failed to instantiate " + clazz.getName());
+            }
+        }
+        return instance;
+    }
+
+    private static Object[] getInitArgs(Constructor<?> constructor) {
+        return Stream.of(constructor.getParameters())
+                .map(Parameter::getType)
+                .map(TestUtil::getValueOfType)
+                .toArray();
+    }
+
+    public static Object getValueOfType(Class<?> clazz) {
+        if (clazz.isAssignableFrom(Long.class)) {
+            return (long) getRandomIndexValue();
+        } else if (clazz.isAssignableFrom(Integer.class)) {
+            return getRandomIndexValue();
+        } else if (clazz.isAssignableFrom(String.class)) {
+            return getRandomString();
+        }
+        return null;
+    }
+
+    private static void populateWithRandomValues(Object item) {
+        for (Field field : item.getClass().getDeclaredFields()) {
+            if (isLongField(field)) {
+                assign(item, field, (long)getRandomIndexValue());
+            } else if (isIntegerField(field)) {
+                assign(item, field, getRandomIndexValue());
+            } else if (isStringField(field)) {
+                assign(item, field, getRandomString());
+            }
+        }
+    }
+
+    private static boolean isIntegerField(Field field) {
+        return field.getType().isAssignableFrom(Integer.TYPE);
+    }
+
+    private static boolean isLongField(Field field) {
+        return field.getType().isAssignableFrom(Long.TYPE);
+    }
+
+    private static boolean isStringField(Field field) {
+        return field.getType().isAssignableFrom(String.class);
+    }
+
+    private static <T> void assign(Object subject, Field field, Object value) {
+        try {
+            if (!field.trySetAccessible()) {
+                return;
+            }
+            field.set(subject, value);
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public static int getRandomIndexValue() {
         return Math.abs(RANDOM.nextInt()) + 1;
-    }
-
-    public static Flux<Artist> getRandomArtists(int count) {
-        return Flux.range(1, count).flatMap(TestUtil::getRandomArtistMono);
-    }
-
-    public static Mono<Artist> getRandomArtistMono() {
-        return Mono.just(getRandomArtist());
-    }
-
-    public static Artist getRandomArtist() {
-        return getRandomArtist(100);
-    }
-
-    public static Artist getRandomArtist(long id) {
-        Artist artist = Artist.builder()
-                .id(id)
-                .dataQuality(getRandomString(10))
-                .profile(getRandomString(100))
-                .name(getRandomString(20))
-                .realName(getRandomString(33))
-                .build();
-        assertNotNull(artist.getId());
-        return artist;
-    }
-
-    public static Mono<Artist> getRandomArtistMono(long id) {
-        return Mono.just(getRandomArtist(id));
-    }
-
-    public static ArtistCommand.Create getCreateCommandFrom(Artist artist) {
-        return new ArtistCommand.Create(
-                artist.getId(),
-                artist.getName(),
-                artist.getRealName(),
-                artist.getProfile(),
-                artist.getDataQuality());
-    }
-
-    public static ArtistCommand.Update getUpdateCommandFrom(Artist artist) {
-        return new ArtistCommand.Update(
-                artist.getName(),
-                artist.getRealName(),
-                artist.getProfile(),
-                artist.getDataQuality());
     }
 
     public static String getRandomString() {

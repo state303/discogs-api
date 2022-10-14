@@ -1,16 +1,19 @@
 package io.dsub.discogs.api.artist.command;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import io.dsub.discogs.api.artist.model.Artist;
+import lombok.*;
+import reactor.core.publisher.Mono;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 public abstract class ArtistCommand {
+    @With
     @Getter
-    @RequiredArgsConstructor
-    public static class Create extends ArtistCommand {
+    @Builder
+    @AllArgsConstructor
+    public static class Create {
         @Min(0)
         @NotNull
         private final Long id;
@@ -21,11 +24,23 @@ public abstract class ArtistCommand {
         private final String profile;
         @Size(max = 255)
         private final String dataQuality;
+
+        public Mono<Artist> toEntity() {
+            return Mono.just(Artist.builder()
+                    .id(id)
+                    .name(name)
+                    .realName(realName)
+                    .profile(profile)
+                    .dataQuality(dataQuality)
+                    .build());
+        }
     }
 
+    @With
     @Getter
-    @RequiredArgsConstructor
-    public static class Update extends ArtistCommand {
+    @Builder
+    @AllArgsConstructor
+    public static class Update {
         @Size(max = 1000)
         private final String name;
         @Size(max = 2000)
@@ -33,5 +48,15 @@ public abstract class ArtistCommand {
         private final String profile;
         @Size(max = 255)
         private final String dataQuality;
+
+        public Mono<Artist> toEntity(Long id) {
+            return Mono.just(Artist.builder()
+                    .id(id)
+                    .name(name)
+                    .realName(realName)
+                    .profile(profile)
+                    .dataQuality(dataQuality)
+                    .build());
+        }
     }
 }

@@ -12,8 +12,6 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.time.LocalDateTime;
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 @Service
@@ -26,9 +24,7 @@ public class GenreServiceImpl implements GenreService {
             artist -> Mono.just(artist.toDTO());
 
     private final Function<GenreCommand.Create, Mono<Genre>> createGenreToGenre =
-            cmd -> Mono.just(Genre.builder()
-                    .createdAt(LocalDateTime.now())
-                    .name(cmd.getName()).build());
+            cmd -> Mono.just(Genre.builder().name(cmd.getName()).build());
 
     private final Function<GenreCommand.Delete, Mono<String>> getName =
             cmd -> Mono.just(cmd.getName());
@@ -39,7 +35,7 @@ public class GenreServiceImpl implements GenreService {
     }
 
     @Override
-    public Mono<Page<GenreDTO>> findAll(Pageable pageable) {
+    public Mono<Page<GenreDTO>> findAllByPage(Pageable pageable) {
         Flux<GenreDTO> sortedDTO = genreRepository.findAll(pageable.getSort()).flatMap(toDTO);
         return getPagedResult(count(), pageable, sortedDTO);
     }
@@ -62,6 +58,7 @@ public class GenreServiceImpl implements GenreService {
     public Mono<Long> count() {
         return this.genreRepository.count();
     }
+
     @Override
     public <T> Mono<T> validate(T item) {
         return this.validator.validate(item);

@@ -1,6 +1,14 @@
 package io.dsub.discogs.api.label.dto;
 
-import lombok.Builder;
+import lombok.*;
 
+@With
+@Data
 @Builder
-public record LabelDTO(long id, String contactInfo, String dataQuality, String name, String profile) {}
+public final class LabelDTO {
+    private final long id;
+    private final String contactInfo;
+    private final String dataQuality;
+    private final String name;
+    private final String profile;
+}

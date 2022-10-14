@@ -1,23 +1,21 @@
 package io.dsub.discogs.api.validator;
 
-import io.dsub.discogs.api.artist.model.Artist;
 import io.dsub.discogs.api.test.ConcurrentTest;
 import io.dsub.discogs.api.test.util.TestUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import javax.validation.ConstraintViolation;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 
 class DelegatingReactiveValidatorImplTest extends ConcurrentTest {
+
     @Mock
     javax.validation.Validator validator;
 
@@ -42,13 +40,8 @@ class DelegatingReactiveValidatorImplTest extends ConcurrentTest {
 
     @Test
     void validateDelegatesReturnFromValidator() {
-        Mono<Artist> artistMono = TestUtil.getRandomArtistMono(1);
-        assertNotNull(artistMono);
-        Artist expected = artistMono.block();
-        assertNotNull(expected);
-
+        var expected = new Object();
         given(validator.validate(any())).willReturn(Set.of());
-
         StepVerifier.create(reactiveValidator.validate(expected))
                 .expectNext(expected)
                 .verifyComplete();
