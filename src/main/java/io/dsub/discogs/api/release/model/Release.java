@@ -11,6 +11,7 @@ import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
 import javax.validation.constraints.NotNull;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Getter
@@ -56,7 +57,7 @@ public class Release extends PersistableBaseEntity<Long> {
     private String notes;
 
     @Column("release_date")
-    private LocalDateTime releaseDate;
+    private LocalDate releaseDate;
 
     @Column("release_date_reported")
     private String releaseDateReported;
@@ -72,16 +73,16 @@ public class Release extends PersistableBaseEntity<Long> {
                 .id(id)
                 .country(country)
                 .dataQuality(dataQuality)
-                .releaseDate(releaseDate)
-                .releaseDateReported(releaseDateReported)
                 .hasValidDay(hasValidDay)
                 .hasValidMonth(hasValidMonth)
                 .hasValidYear(hasValidYear)
-                .isMaster(isMaster)
                 .masterId(masterId)
+                .isMaster(isMaster)
                 .notes(notes)
-                .title(title)
+                .releaseDate(releaseDate)
+                .releaseDateReported(releaseDateReported)
                 .status(status)
+                .title(title)
                 .build();
     }
 }

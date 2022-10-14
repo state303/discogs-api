@@ -204,17 +204,6 @@ CREATE TABLE IF NOT EXISTS master_style
         primary key (master_id, style)
 );
 
-CREATE TABLE IF NOT EXISTS master_main_release
-(
-    created_at timestamp NOT NULL,
-    master_id  integer   NOT NULL
-        constraint fk_master_main_release_master_id_master
-            references master,
-    release_id integer   NOT NULL
-        constraint fk_master_main_release_release_id_release
-            references release
-);
-
 CREATE TABLE IF NOT EXISTS release_style
 (
     created_at timestamp    NOT NULL,

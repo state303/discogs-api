@@ -3,7 +3,7 @@ package io.dsub.discogs.api.release.dto;
 import lombok.Builder;
 import lombok.With;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @With
 @Builder
@@ -16,9 +16,8 @@ public record ReleaseDTO(
         String status,
         String title,
         String releaseDateReported,
-        LocalDateTime releaseDate,
+        LocalDate releaseDate,
         Boolean isMaster,
         Boolean hasValidDay,
         Boolean hasValidMonth,
-        Boolean hasValidYear) {
-}
+        Boolean hasValidYear) {}
