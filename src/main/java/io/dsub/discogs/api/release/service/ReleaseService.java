@@ -15,6 +15,6 @@ public interface ReleaseService extends PagingService, ValidatingService {
     Mono<Page<ReleaseDTO>> findAllByPage(Pageable pageable);
     Mono<ReleaseDTO> findById(long id);
     Mono<ReleaseDTO> upsert(Create command);
-    Mono<ReleaseDTO> update(Update command);
-    Mono<ReleaseDTO> delete(DeleteByID command);
+    Mono<ReleaseDTO> update(long id, Update command);
+    Mono<Void> delete(long id);
 }

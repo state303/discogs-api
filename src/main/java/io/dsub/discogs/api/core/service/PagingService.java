@@ -9,7 +9,6 @@ import reactor.core.publisher.Mono;
 import java.util.ArrayList;
 
 public interface PagingService {
-
     default <T> Mono<Page<T>> getPagedResult(Mono<Long> count, Pageable pageable, Flux<T> items) {
         return count.flatMap(c -> items
                         .buffer(pageable.getPageSize(), pageable.getPageNumber() + 1)

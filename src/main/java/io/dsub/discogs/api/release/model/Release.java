@@ -1,6 +1,8 @@
 package io.dsub.discogs.api.release.model;
 
 import io.dsub.discogs.api.core.entity.PersistableBaseEntity;
+import io.dsub.discogs.api.parser.ReleaseDate;
+import io.dsub.discogs.api.parser.ReleaseDateParser;
 import io.dsub.discogs.api.release.command.ReleaseCommand;
 import io.dsub.discogs.api.release.dto.ReleaseDTO;
 import lombok.AllArgsConstructor;
@@ -8,8 +10,10 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.ToString;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
+import reactor.core.publisher.Mono;
 
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
@@ -69,6 +73,7 @@ public class Release extends PersistableBaseEntity<Long> {
     @Column("title")
     private String title;
 
+    @Transient
     public ReleaseDTO toDTO() {
         return ReleaseDTO.builder()
                 .id(id)
@@ -87,12 +92,39 @@ public class Release extends PersistableBaseEntity<Long> {
                 .build();
     }
 
-    public static Release fromCreateCommand(ReleaseCommand.Create command) {
+    public Release withMutableDataFrom(ReleaseCommand.Update command, ReleaseDate date) {
+        return Release.builder()
+                .id(this.id)
+                .releaseDate(date.toLocalDate())
+                .hasValidYear(date.isValidYear())
+                .hasValidMonth(date.isValidMonth())
+                .hasValidDay(date.isValidDay())
+                .dataQuality(command.getDataQuality())
+                .country(command.getCountry())
+                .notes(command.getNotes())
+                .isMaster(command.getIsMaster())
+                .masterId(command.getMasterId())
+                .listedReleaseDate(command.getReleaseDate())
+                .status(command.getStatus())
+                .title(command.getTitle())
+                .build();
+    }
+
+    public static Release fromCreateCommand(ReleaseCommand.Create command, ReleaseDate date) {
         return Release.builder()
                 .id(command.getId())
-                .country(command.getCountry())
+                .releaseDate(date.toLocalDate())
+                .hasValidYear(date.isValidYear())
+                .hasValidMonth(date.isValidMonth())
+                .hasValidDay(date.isValidDay())
                 .dataQuality(command.getDataQuality())
+                .country(command.getCountry())
+                .notes(command.getNotes())
+                .isMaster(command.getIsMaster())
+                .masterId(command.getMasterId())
                 .listedReleaseDate(command.getReleaseDate())
+                .status(command.getStatus())
+                .title(command.getTitle())
                 .build();
     }
 }
