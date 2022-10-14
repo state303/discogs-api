@@ -29,19 +29,20 @@ public class ArtistServiceImpl implements ArtistService {
     private final Function<Artist, Mono<ArtistDTO>> toDTO = artist -> Mono.just(artist.toDTO());
     private final Predicate<Long> greaterThanZero = i -> i > 0;
     private final Function<Create, Mono<Artist>> createCommandToArtistMono = create -> Mono.just(create)
-            .flatMap(c -> Mono.just(Artist.builder()
-                    .id(c.getId())
-                    .createdAt(LocalDateTime.now())
-                    .lastModifiedAt(LocalDateTime.now())
-                    .name(c.getName())
-                    .realName(c.getRealName())
-                    .profile(c.getProfile())
-                    .dataQuality(c.getDataQuality())
+            .zipWith(Mono.just(LocalDateTime.now()))
+            .flatMap(tuple -> Mono.just(Artist.builder()
+                    .id(tuple.getT1().getId())
+                    .createdAt(tuple.getT2())
+                    .lastModifiedAt(tuple.getT2())
+                    .name(tuple.getT1().getName())
+                    .realName(tuple.getT1().getRealName())
+                    .profile(tuple.getT1().getProfile())
+                    .dataQuality(tuple.getT1().getDataQuality())
                     .build()));
 
     @Override
     public Mono<Page<ArtistDTO>> getArtists(Pageable pageable) {
-        Flux<ArtistDTO> sortedDTOs =  artistRepository.findAll(pageable.getSort()).flatMap(toDTO);
+        Flux<ArtistDTO> sortedDTOs = artistRepository.findAll(pageable.getSort()).flatMap(toDTO);
         return getPagedResult(count(), pageable, sortedDTOs);
     }
 

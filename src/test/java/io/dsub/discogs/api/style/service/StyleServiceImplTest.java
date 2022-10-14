@@ -26,6 +26,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.IntStream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
@@ -135,20 +136,23 @@ class StyleServiceImplTest extends ConcurrentTest {
 
     @Test
     void saveCallsRepositorySave() {
-        final Style style = getStyle();
-        final StyleCommand.Create createCommand = new StyleCommand.Create(style.getName());
-        final StyleDTO dto = new StyleDTO(style.getName());
-        assertNotNull(dto);
+        var style = getStyle();
+        var createCommand = new StyleCommand.Create(style.getName());
+        var dto = new StyleDTO(style.getName());
+        var captor = ArgumentCaptor.forClass(Style.class);
+        var begin = LocalDateTime.now();
 
         given(validator.validate(createCommand)).willReturn(Mono.just(createCommand));
-        given(styleRepository.saveOrUpdate(createCommand)).willReturn(Mono.just(style));
+        given(styleRepository.saveOrUpdate(captor.capture())).willReturn(Mono.just(style));
 
         StepVerifier.create(styleService.save(createCommand))
                 .expectNext(dto)
                 .verifyComplete();
 
         verify(validator, times(1)).validate(createCommand);
-        verify(styleRepository, times(1)).saveOrUpdate(createCommand);
+        verify(styleRepository, times(1)).saveOrUpdate(any());
+
+        assertThat(captor.getValue().getCreatedAt()).isAfter(begin);
     }
 
     @Test

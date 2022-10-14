@@ -5,12 +5,10 @@ import io.dsub.discogs.api.artist.dto.ArtistDTO;
 import io.dsub.discogs.api.core.entity.PersistableBaseEntity;
 import lombok.*;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.annotation.Transient;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
 import javax.validation.constraints.Min;
-import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 

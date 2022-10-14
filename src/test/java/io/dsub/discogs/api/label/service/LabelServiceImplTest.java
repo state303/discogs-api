@@ -14,12 +14,17 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import java.util.*;
+import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.List;
 import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -110,22 +115,28 @@ class LabelServiceImplTest extends ConcurrentTest {
         var label = randomLabel(id);
         var dto = label.toDTO();
         var command = getUpdateCommandFrom(label);
+        var begin = LocalDateTime.now();
+
+        ArgumentCaptor<Label> captor = ArgumentCaptor.forClass(Label.class);
 
         given(labelRepository.findById(id)).willReturn(Mono.just(label));
-        given(labelRepository.save(label)).willReturn(Mono.just(label));
+        given(labelRepository.save(captor.capture())).willReturn(Mono.just(label));
         given(validator.validate(command)).willReturn(Mono.just(command));
 
         assertNotNull(dto);
         assertNotNull(label);
         assertNotNull(command);
-        labelService.updateLabel(id, command).block();
-//        StepVerifier.create(labelService.updateLabel(id, command))
-//                .expectNext(dto)
-//                .verifyComplete();
+
+        StepVerifier.create(labelService.updateLabel(id, command))
+                .expectNext(dto)
+                .verifyComplete();
 
         verify(validator, times(1)).validate(command);
         verify(labelRepository, times(1)).findById(id);
-        verify(labelRepository, times(1)).save(label);
+        verify(labelRepository, times(1)).save(any());
+
+        var arg = captor.getValue();
+        assertThat(arg.getLastModifiedAt()).isAfter(begin);
     }
 
     @Test
@@ -133,7 +144,7 @@ class LabelServiceImplTest extends ConcurrentTest {
         var label = randomLabel(5);
         var dto = label.toDTO();
         var command = getCreateCommandFrom(label);
-        var captor = ArgumentCaptor.forClass(LabelCommand.Create.class);
+        var captor = ArgumentCaptor.forClass(Label.class);
 
         given(validator.validate(command)).willReturn(Mono.just(command));
         given(labelRepository.saveOrUpdate(captor.capture())).willReturn(Mono.just(label));
@@ -143,7 +154,27 @@ class LabelServiceImplTest extends ConcurrentTest {
                 .verifyComplete();
 
         verify(validator, times(1)).validate(command);
-        verify(labelRepository, times(1)).saveOrUpdate(command);
+        verify(labelRepository, times(1)).saveOrUpdate(any());
+    }
+
+    @Test
+    void saveOrUpdateSetsLocalDateTimeAsNow() {
+        var label = randomLabel(5);
+        var captor = ArgumentCaptor.forClass(Label.class);
+        var dto = label.toDTO();
+        var createCommand = getCreateCommandFrom(label);
+
+        given(validator.validate(createCommand)).willReturn(Mono.just(createCommand));
+        given(labelRepository.saveOrUpdate(captor.capture())).willReturn(Mono.just(label));
+
+        StepVerifier.create(labelService.saveOrUpdate(createCommand))
+                .expectNext(dto)
+                .verifyComplete();
+
+        Label foundArgLabel = captor.getValue();
+
+        assertThat(foundArgLabel.getCreatedAt()).isAfter(label.getCreatedAt());
+        assertThat(foundArgLabel.getLastModifiedAt()).isAfter(label.getLastModifiedAt());
     }
 
     @Test
@@ -175,18 +206,25 @@ class LabelServiceImplTest extends ConcurrentTest {
     }
 
     private List<Label> getLabels(int size) {
-        return IntStream.range(0, size).mapToObj(this::randomLabel).toList();
+        return IntStream
+                .range(0, size)
+                .mapToObj(this::randomLabel)
+                .toList();
     }
 
     private LabelDTO[] arrayFromCollection(Collection<Label> iterable) {
-        return iterable.stream().map(Label::toDTO).toArray(LabelDTO[]::new);
+        return iterable.stream()
+                .map(Label::toDTO)
+                .toArray(LabelDTO[]::new);
     }
 
     private LabelCommand.Update getUpdateCommandFrom(Label label) {
-        return new LabelCommand.Update(label.getName(),
+        return new LabelCommand.Update(
+                label.getName(),
                 label.getProfile(),
                 label.getDataQuality(),
-                label.getContactInfo());
+                label.getContactInfo(),
+                label.getParentLabelId());
     }
 
     private LabelCommand.Create getCreateCommandFrom(Label label) {
@@ -194,16 +232,20 @@ class LabelServiceImplTest extends ConcurrentTest {
                 label.getName(),
                 label.getProfile(),
                 label.getDataQuality(),
-                label.getContactInfo());
+                label.getContactInfo(),
+                label.getParentLabelId());
     }
 
     private Label randomLabel(long id) {
         return Label.builder()
                 .id(id)
+                .createdAt(LocalDateTime.now())
+                .lastModifiedAt(LocalDateTime.now())
                 .name(TestUtil.getRandomString())
                 .profile(TestUtil.getRandomString())
                 .contactInfo(TestUtil.getRandomString())
                 .dataQuality(TestUtil.getRandomString())
+                .parentLabelId((long) TestUtil.getRandomIndexValue())
                 .build();
     }
 }

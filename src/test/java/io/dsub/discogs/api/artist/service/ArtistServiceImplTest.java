@@ -3,6 +3,7 @@ package io.dsub.discogs.api.artist.service;
 import io.dsub.discogs.api.artist.dto.ArtistDTO;
 import io.dsub.discogs.api.artist.model.Artist;
 import io.dsub.discogs.api.artist.repository.ArtistRepository;
+import io.dsub.discogs.api.label.model.Label;
 import io.dsub.discogs.api.test.ConcurrentTest;
 import io.dsub.discogs.api.test.util.TestUtil;
 import io.dsub.discogs.api.validator.Validator;
@@ -22,6 +23,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import java.time.LocalDateTime;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -30,6 +32,7 @@ import java.util.stream.Collectors;
 
 import static io.dsub.discogs.api.artist.command.ArtistCommand.Create;
 import static io.dsub.discogs.api.artist.command.ArtistCommand.Update;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
@@ -116,22 +119,22 @@ class ArtistServiceImplTest extends ConcurrentTest {
         assertNotNull(artists);
 
         AtomicInteger found = new AtomicInteger(0);
+        ArgumentCaptor<Artist> captor = ArgumentCaptor.forClass(Artist.class);
 
         artists.forEach(artist -> {
-            Create createCommand = TestUtil.getCreateCommandFrom(artist);
-            given(artistRepository.saveOrUpdate(createCommand)).willReturn(Mono.just(artist));
-            ArtistDTO expected = artist.toDTO();
-            ArtistDTO got = artistService.upsert(createCommand).block();
-            assertEquals(expected, got);
-            assertNotNull(got);
-            assertEquals(createCommand.getId(), artist.getId());
-            assertEquals(createCommand.getName(), artist.getName());
-            assertEquals(createCommand.getRealName(), artist.getRealName());
-            assertEquals(createCommand.getProfile(), artist.getProfile());
-            assertEquals(createCommand.getDataQuality(), artist.getDataQuality());
-            found.addAndGet(1);
-        });
+            var begin = LocalDateTime.now();
+            given(artistRepository.saveOrUpdate(captor.capture())).willReturn(Mono.just(artist));
 
+            var cmd = TestUtil.getCreateCommandFrom(artist);
+            StepVerifier.create(artistService.upsert(cmd))
+                    .expectNext(artist.toDTO())
+                    .verifyComplete();
+            found.addAndGet(1);
+
+            var arg = captor.getValue();
+            assertThat(arg.getCreatedAt()).isAfter(begin);
+            assertThat(arg.getLastModifiedAt()).isEqualTo(arg.getCreatedAt());
+        });
         assertEquals(5, found.get());
     }
 
@@ -178,19 +181,25 @@ class ArtistServiceImplTest extends ConcurrentTest {
         Artist artist = TestUtil.getRandomArtist(id);
         Update cmd = new Update("a", "b", "c", "d");
 
+        var captor = ArgumentCaptor.forClass(Artist.class);
+        var begin = LocalDateTime.now();
+
         given(artistRepository.findById(id))
                 .willReturn(Mono.just(artist));
-        given(artistRepository.save(any()))
+        given(artistRepository.save(captor.capture()))
                 .willReturn(Mono.just(artist.withMutableDataFrom(cmd)));
 
-        Mono<ArtistDTO> resultDTO = artistService.update(id, cmd);
-        ArtistDTO got = resultDTO.block();
+        var resultDTO = artistService.update(id, cmd);
+        var got = resultDTO.block();
 
         assertNotNull(got);
         assertEquals("a", got.name());
         assertEquals("b", got.realName());
         assertEquals("c", got.profile());
         assertEquals("d", got.dataQuality());
+
+        var gotArtist = captor.getValue();
+        assertThat(gotArtist.getLastModifiedAt()).isAfter(begin);
     }
 
     @Test

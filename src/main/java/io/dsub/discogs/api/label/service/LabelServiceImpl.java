@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.function.Function;
 
@@ -27,13 +28,16 @@ public class LabelServiceImpl implements LabelService {
 
     private final Function<LabelCommand.Create, Mono<Label>> createCommandToLabelMono =
             command -> Mono.just(command)
-                    .flatMap(c -> Mono.just(Label.builder()
-                            .createdAt(LocalDateTime.now())
-                            .lastModifiedAt(LocalDateTime.now())
-                            .id(c.getId())
-                            .name(c.getName())
-                            .profile(c.getProfile())
-                            .parentLabelId(c.getParentLabelId())
+                    .zipWith(Mono.just(LocalDateTime.now()))
+                    .flatMap(tuple -> Mono.just(Label.builder()
+                            .createdAt(tuple.getT2())
+                            .lastModifiedAt(tuple.getT2())
+                            .id(tuple.getT1().getId())
+                            .name(tuple.getT1().getName())
+                            .contactInfo(tuple.getT1().getContactInfo())
+                            .profile(tuple.getT1().getProfile())
+                            .dataQuality(tuple.getT1().getDataQuality())
+                            .parentLabelId(tuple.getT1().getParentLabelId())
                             .build()));
 
     @Override

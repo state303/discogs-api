@@ -55,7 +55,9 @@ public class Label extends PersistableBaseEntity<Long> {
                 .name(command.getName())
                 .dataQuality(command.getDataQuality())
                 .profile(command.getProfile())
+                .lastModifiedAt(LocalDateTime.now())
                 .contactInfo(command.getContactInfo())
+                .parentLabelId(command.getParentLabelId())
                 .build();
     }
 

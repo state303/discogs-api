@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDateTime;
 import java.util.function.Function;
 
 
@@ -22,6 +23,12 @@ public class StyleServiceImpl implements StyleService {
     private final StyleRepository styleRepository;
     private final Validator validator;
     private final Function<Style, Mono<StyleDTO>> toDTO = style -> Mono.just(style.toDTO());
+
+    private final Function<StyleCommand.Create, Mono<Style>> createCommandToStyleMono =
+            cmd -> Mono.just(Style.builder()
+                    .name(cmd.getName())
+                    .createdAt(LocalDateTime.now())
+                    .build());
 
     @Override
     public Flux<StyleDTO> findAll() {
@@ -37,6 +44,7 @@ public class StyleServiceImpl implements StyleService {
     @Override
     public Mono<StyleDTO> save(StyleCommand.Create command) {
         return validate(command)
+                .flatMap(createCommandToStyleMono)
                 .flatMap(styleRepository::saveOrUpdate)
                 .flatMap(toDTO);
     }

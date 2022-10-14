@@ -1,5 +1,6 @@
 package io.dsub.discogs.api.genre.service;
 
+import io.dsub.discogs.api.artist.model.Artist;
 import io.dsub.discogs.api.genre.command.GenreCommand;
 import io.dsub.discogs.api.genre.dto.GenreDTO;
 import io.dsub.discogs.api.genre.model.Genre;
@@ -26,6 +27,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.IntStream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
@@ -134,20 +136,28 @@ class GenreServiceImplTest extends ConcurrentTest {
 
     @Test
     void saveCallsRepositorySave() {
-        final Genre genre = getGenre();
-        final GenreCommand.Create createCommand = new GenreCommand.Create(genre.getName());
-        final GenreDTO dto = new GenreDTO(genre.getName());
+        final var genre = getGenre();
+        final var createCommand = new GenreCommand.Create(genre.getName());
+        final var dto = new GenreDTO(genre.getName());
         assertNotNull(dto);
+        final var begin = LocalDateTime.now();
+        final var captor = ArgumentCaptor.forClass(Genre.class);
 
-        given(validator.validate(createCommand)).willReturn(Mono.just(createCommand));
-        given(genreRepository.saveOrUpdate(createCommand)).willReturn(Mono.just(genre));
+        given(validator.validate(createCommand))
+                .willReturn(Mono.just(createCommand));
+        given(genreRepository.saveOrUpdate(captor.capture()))
+                .willReturn(Mono.just(genre));
 
         StepVerifier.create(genreService.save(createCommand))
                 .expectNext(dto)
                 .verifyComplete();
 
         verify(validator, times(1)).validate(createCommand);
-        verify(genreRepository, times(1)).saveOrUpdate(createCommand);
+        verify(genreRepository, times(1)).saveOrUpdate(any());
+
+        var got = captor.getValue();
+        assertEquals(genre.getName(), got.getName());
+        assertThat(got.getCreatedAt()).isAfter(begin);
     }
 
     @Test
