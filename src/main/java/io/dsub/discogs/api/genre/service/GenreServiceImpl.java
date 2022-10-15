@@ -1,10 +1,8 @@
 package io.dsub.discogs.api.genre.service;
 
-import io.dsub.discogs.api.genre.command.GenreCommand;
 import io.dsub.discogs.api.genre.dto.GenreDTO;
 import io.dsub.discogs.api.genre.model.Genre;
 import io.dsub.discogs.api.genre.repository.GenreRepository;
-import io.dsub.discogs.api.validator.Validator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,15 +17,8 @@ import java.util.function.Function;
 public class GenreServiceImpl implements GenreService {
 
     private final GenreRepository genreRepository;
-    private final Validator validator;
     private final Function<Genre, Mono<GenreDTO>> toDTO =
             artist -> Mono.just(artist.toDTO());
-
-    private final Function<GenreCommand.Create, Mono<Genre>> createGenreToGenre =
-            cmd -> Mono.just(Genre.builder().name(cmd.getName()).build());
-
-    private final Function<GenreCommand.Delete, Mono<String>> getName =
-            cmd -> Mono.just(cmd.getName());
 
     @Override
     public Flux<GenreDTO> findAll() {
@@ -41,26 +32,16 @@ public class GenreServiceImpl implements GenreService {
     }
 
     @Override
-    public Mono<GenreDTO> save(GenreCommand.Create command) {
-        return validate(command)
-                .flatMap(createGenreToGenre)
-                .flatMap(genreRepository::saveOrUpdate)
-                .flatMap(toDTO);
+    public Mono<GenreDTO> save(String name) {
+        return genreRepository.saveOrUpdate(Genre.builder().name(name).build()).flatMap(toDTO);
     }
 
     @Override
-    public Mono<Void> delete(GenreCommand.Delete command) {
-        return validate(command)
-                .flatMap(getName)
-                .flatMap(genreRepository::deleteById);
+    public Mono<Void> delete(String name) {
+        return genreRepository.deleteById(name);
     }
 
     public Mono<Long> count() {
         return this.genreRepository.count();
-    }
-
-    @Override
-    public <T> Mono<T> validate(T item) {
-        return this.validator.validate(item);
     }
 }

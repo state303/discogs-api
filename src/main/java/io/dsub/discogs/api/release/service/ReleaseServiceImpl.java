@@ -14,27 +14,18 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.util.function.Tuple2;
 
-import java.util.function.BiFunction;
 import java.util.function.Function;
 
 @Service
 @RequiredArgsConstructor
 public class ReleaseServiceImpl implements ReleaseService {
-
     private final ReleaseRepository repository;
-    private final Validator validator;
     private final ReleaseDateParser releaseDateParser = new ReleaseDateParserImpl();
     private final Function<Release, Mono<ReleaseDTO>> toReleaseDTO =
             release -> Mono.just(release.toDTO());
     private final Function<ReleaseCommand.Create, Mono<Release>> releaseCreateCommandToReleaseMono =
             command -> Mono.just(Release.fromCreateCommand(command, parseDate(command)));
-
-    @Override
-    public <T> Mono<T> validate(T item) {
-        return validator.validate(item);
-    }
 
     @Override
     public Flux<ReleaseDTO> findAll() {

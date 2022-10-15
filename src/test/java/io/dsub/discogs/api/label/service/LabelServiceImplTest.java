@@ -36,18 +36,17 @@ class LabelServiceImplTest extends ConcurrentTest {
 
     @Mock
     private LabelRepository labelRepository;
-    @Mock
-    private Validator validator;
+
     private LabelServiceImpl labelService;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        labelService = new LabelServiceImpl(labelRepository, validator);
+        labelService = new LabelServiceImpl(labelRepository);
     }
 
     @Test
-    void getLabelsReturnsExact_FromLabelRepository() {
+    void getLabelsReturnsExactFromLabelRepository() {
         List<Label> labels = getLabels(10);
         given(labelRepository.findAll()).willReturn(Flux.fromIterable(labels));
         LabelDTO[] expected = arrayFromCollection(labels);
@@ -65,7 +64,7 @@ class LabelServiceImplTest extends ConcurrentTest {
     }
 
     @Test
-    void getLabelsCallsRepository_WithPageable() {
+    void getLabelsCallsRepositoryWithPageable() {
         Pageable pageable = PageRequest.of(0, 10);
         List<Label> labels = getLabels(10).stream().toList();
         List<LabelDTO> expectedContent = labels.stream().map(Label::toDTO).toList();
@@ -82,30 +81,21 @@ class LabelServiceImplTest extends ConcurrentTest {
     }
 
     @Test
-    void updateLabelValidatesCommand_ReturnsError() {
+    void updateLabelHandlesNonExistLabel() {
         LabelCommand.Update command = Mockito.mock(LabelCommand.Update.class);
-        given(validator.validate(command)).willReturn(Mono.empty());
-
-        StepVerifier.create(labelService.update(10L, command))
-                .verifyError(ItemNotFoundException.class);
-
-        verify(validator, times(1)).validate(command);
-        verifyNoInteractions(labelRepository);
+        given(labelRepository.findById(10L)).willReturn(Mono.empty());
+        StepVerifier.create(labelService.update(10L, command)).verifyComplete();
+        verify(labelRepository, times(1)).findById(10L);
+        verify(labelRepository, never()).save(any());
     }
 
     @Test
-    void updateLabelMissingItem_ReturnsError() {
+    void updateLabelQueriesLabelRepository() {
         long id = TestUtil.getRandomIndexValue();
         var otherLabel = spy(randomLabel(id));
         var command = spy(getUpdateCommandFrom(otherLabel));
-
-        given(validator.validate(command)).willReturn(Mono.just(command));
         given(labelRepository.findById(id)).willReturn(Mono.empty());
-
-        StepVerifier.create(labelService.update(id, command))
-                .verifyError(ItemNotFoundException.class);
-
-        verify(validator, times(1)).validate(command);
+        StepVerifier.create(labelService.update(id, command)).verifyComplete();
         verify(labelRepository, times(1)).findById(id);
     }
 
@@ -121,7 +111,6 @@ class LabelServiceImplTest extends ConcurrentTest {
 
         given(labelRepository.findById(id)).willReturn(Mono.just(label));
         given(labelRepository.save(captor.capture())).willReturn(Mono.just(label));
-        given(validator.validate(command)).willReturn(Mono.just(command));
 
         assertNotNull(dto);
         assertNotNull(label);
@@ -131,7 +120,6 @@ class LabelServiceImplTest extends ConcurrentTest {
                 .expectNext(dto)
                 .verifyComplete();
 
-        verify(validator, times(1)).validate(command);
         verify(labelRepository, times(1)).findById(id);
         verify(labelRepository, times(1)).save(any());
 
@@ -146,14 +134,12 @@ class LabelServiceImplTest extends ConcurrentTest {
         var command = getCreateCommandFrom(label);
         var captor = ArgumentCaptor.forClass(Label.class);
 
-        given(validator.validate(command)).willReturn(Mono.just(command));
         given(labelRepository.saveOrUpdate(captor.capture())).willReturn(Mono.just(label));
 
         StepVerifier.create(labelService.upsert(command))
                 .expectNext(dto)
                 .verifyComplete();
 
-        verify(validator, times(1)).validate(command);
         verify(labelRepository, times(1)).saveOrUpdate(any());
     }
 
@@ -164,7 +150,6 @@ class LabelServiceImplTest extends ConcurrentTest {
         var dto = label.toDTO();
         var createCommand = getCreateCommandFrom(label);
 
-        given(validator.validate(createCommand)).willReturn(Mono.just(createCommand));
         given(labelRepository.saveOrUpdate(captor.capture())).willReturn(Mono.just(label));
 
         StepVerifier.create(labelService.upsert(createCommand))
@@ -189,8 +174,7 @@ class LabelServiceImplTest extends ConcurrentTest {
     void findByIdReturnsError() {
         long id = TestUtil.getRandomIndexValue();
         given(labelRepository.findById(id)).willReturn(Mono.empty());
-        StepVerifier.create(labelService.findById(id))
-                .verifyError(ItemNotFoundException.class);
+        StepVerifier.create(labelService.findById(id)).verifyComplete();
         verify(labelRepository, times(1)).findById(id);
     }
 

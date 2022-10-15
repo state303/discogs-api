@@ -23,7 +23,6 @@ import java.util.function.Predicate;
 @RequiredArgsConstructor
 public class ArtistServiceImpl implements ArtistService {
     private final ArtistRepository artistRepository;
-    private final Validator validator;
     private final Function<Artist, Mono<ArtistDTO>> toDTO = artist -> Mono.just(artist.toDTO());
     private final Predicate<Long> greaterThanZero = i -> i > 0;
 
@@ -35,18 +34,15 @@ public class ArtistServiceImpl implements ArtistService {
 
     @Override
     public Mono<ArtistDTO> update(long id, ArtistCommand.Update command) {
-        return validate(command)
-                .flatMap(cmd -> artistRepository.findById(id))
+        return artistRepository.findById(id)
                 .flatMap(artist -> Mono.just(artist.withMutableDataFrom(command)))
                 .flatMap(artistRepository::save)
-                .flatMap(toDTO)
-                .switchIfEmpty(Mono.error(ItemNotFoundException.getInstance()));
+                .flatMap(toDTO);
     }
 
     @Override
     public Mono<ArtistDTO> upsert(ArtistCommand.Create command) {
-        return validate(command)
-                .flatMap(Create::toEntity)
+        return command.toEntity()
                 .flatMap(artistRepository::saveOrUpdate)
                 .flatMap(toDTO);
     }
@@ -65,17 +61,10 @@ public class ArtistServiceImpl implements ArtistService {
 
     @Override
     public Mono<ArtistDTO> findById(long id) {
-        return artistRepository.findById(id)
-                .flatMap(toDTO)
-                .switchIfEmpty(Mono.error(ItemNotFoundException.getInstance()));
+        return artistRepository.findById(id).flatMap(toDTO);
     }
 
     public Mono<Long> count() {
         return artistRepository.count();
-    }
-
-    @Override
-    public <T> Mono<T> validate(T item) {
-        return validator.validate(item);
     }
 }

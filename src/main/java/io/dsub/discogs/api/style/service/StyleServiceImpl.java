@@ -1,10 +1,8 @@
 package io.dsub.discogs.api.style.service;
 
-import io.dsub.discogs.api.style.command.StyleCommand;
 import io.dsub.discogs.api.style.dto.StyleDTO;
 import io.dsub.discogs.api.style.model.Style;
 import io.dsub.discogs.api.style.repository.StyleRepository;
-import io.dsub.discogs.api.validator.Validator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -12,7 +10,6 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.time.LocalDateTime;
 import java.util.function.Function;
 
 
@@ -21,14 +18,7 @@ import java.util.function.Function;
 public class StyleServiceImpl implements StyleService {
 
     private final StyleRepository styleRepository;
-    private final Validator validator;
     private final Function<Style, Mono<StyleDTO>> toDTO = style -> Mono.just(style.toDTO());
-
-    private final Function<StyleCommand.Create, Mono<Style>> createCommandToStyleMono =
-            cmd -> Mono.just(Style.builder()
-                    .name(cmd.getName())
-                    .build());
-
     @Override
     public Flux<StyleDTO> findAll() {
         return styleRepository.findAll().flatMap(toDTO);
@@ -41,26 +31,16 @@ public class StyleServiceImpl implements StyleService {
     }
 
     @Override
-    public Mono<StyleDTO> save(StyleCommand.Create command) {
-        return validate(command)
-                .flatMap(createCommandToStyleMono)
-                .flatMap(styleRepository::saveOrUpdate)
-                .flatMap(toDTO);
+    public Mono<StyleDTO> upsert(String name) {
+        return styleRepository.saveOrUpdate(name).flatMap(toDTO);
     }
 
     @Override
-    public Mono<Void> delete(StyleCommand.Delete command) {
-        return validate(command)
-                .flatMap(validatedCommand -> Mono.just(validatedCommand.getName()))
-                .flatMap(styleRepository::deleteById);
+    public Mono<Void> delete(String name) {
+        return styleRepository.deleteById(name);
     }
 
     public Mono<Long> count() {
         return styleRepository.count();
-    }
-
-    @Override
-    public <T> Mono<T> validate(T item) {
-        return this.validator.validate(item);
     }
 }

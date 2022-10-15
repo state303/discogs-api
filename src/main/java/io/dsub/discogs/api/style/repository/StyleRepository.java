@@ -11,7 +11,7 @@ import reactor.core.publisher.Mono;
 @Repository
 public interface StyleRepository extends R2dbcRepository<Style, String> {
     @Query("INSERT INTO style(name) " +
-            "VALUES (:#{[0].name}) " +
+            "VALUES ($1) " +
             "ON CONFLICT (name) DO NOTHING")
-    Mono<Style> saveOrUpdate(Style style);
+    Mono<Style> saveOrUpdate(String name);
 }

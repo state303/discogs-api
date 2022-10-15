@@ -36,7 +36,7 @@ public class TestUtil {
             try {
                 var initArgs = getInitArgs(constructor);
                 instance = (T) constructor.newInstance(initArgs);
-            } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
+            } catch (Throwable t) {
                 throw new RuntimeException("failed to instantiate " + clazz.getName());
             }
         }
@@ -57,45 +57,11 @@ public class TestUtil {
             return getRandomIndexValue();
         } else if (clazz.isAssignableFrom(String.class)) {
             return getRandomString();
+        } else if (clazz.isAssignableFrom(Boolean.class)) {
+            return Boolean.FALSE;
         }
         return null;
     }
-
-    private static void populateWithRandomValues(Object item) {
-        for (Field field : item.getClass().getDeclaredFields()) {
-            if (isLongField(field)) {
-                assign(item, field, (long)getRandomIndexValue());
-            } else if (isIntegerField(field)) {
-                assign(item, field, getRandomIndexValue());
-            } else if (isStringField(field)) {
-                assign(item, field, getRandomString());
-            }
-        }
-    }
-
-    private static boolean isIntegerField(Field field) {
-        return field.getType().isAssignableFrom(Integer.TYPE);
-    }
-
-    private static boolean isLongField(Field field) {
-        return field.getType().isAssignableFrom(Long.TYPE);
-    }
-
-    private static boolean isStringField(Field field) {
-        return field.getType().isAssignableFrom(String.class);
-    }
-
-    private static <T> void assign(Object subject, Field field, Object value) {
-        try {
-            if (!field.trySetAccessible()) {
-                return;
-            }
-            field.set(subject, value);
-        } catch (IllegalAccessException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     public static int getRandomIndexValue() {
         return Math.abs(RANDOM.nextInt()) + 1;
     }

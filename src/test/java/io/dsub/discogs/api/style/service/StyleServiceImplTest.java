@@ -1,12 +1,10 @@
 package io.dsub.discogs.api.style.service;
 
-import io.dsub.discogs.api.style.command.StyleCommand;
 import io.dsub.discogs.api.style.dto.StyleDTO;
 import io.dsub.discogs.api.style.model.Style;
 import io.dsub.discogs.api.style.repository.StyleRepository;
 import io.dsub.discogs.api.test.ConcurrentTest;
 import io.dsub.discogs.api.test.util.TestUtil;
-import io.dsub.discogs.api.validator.Validator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -20,31 +18,27 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import javax.validation.ConstraintViolationException;
-import java.time.LocalDateTime;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 class StyleServiceImplTest extends ConcurrentTest {
 
     @Mock
     StyleRepository styleRepository;
-
-    @Mock
-    Validator validator;
-
     StyleServiceImpl styleService;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        styleService = new StyleServiceImpl(styleRepository, validator);
+        styleService = new StyleServiceImpl(styleRepository);
     }
 
     @Test
@@ -116,75 +110,28 @@ class StyleServiceImplTest extends ConcurrentTest {
     }
 
     @Test
-    void saveDelegatesValidationToValidator() {
-        final String error = "test violation";
-        ConstraintViolationException constraintViolationException = TestUtil.getConstraintViolationException(error);
-
-        StyleCommand.Create testInvalidCommand = new StyleCommand.Create("my test style");
-        given(validator.validate(testInvalidCommand)).willReturn(Mono.error(constraintViolationException));
-
-        StepVerifier.create(styleService.save(testInvalidCommand))
-                .expectErrorSatisfies(err -> {
-                    assertEquals(ConstraintViolationException.class, err.getClass());
-                    assertTrue(err.getMessage().contains(error));
-                })
-                .verify();
-
-        verify(validator, times(1)).validate(testInvalidCommand);
-        verifyNoInteractions(styleRepository);
-    }
-
-    @Test
     void saveCallsRepositorySave() {
         var style = getStyle();
-        var createCommand = new StyleCommand.Create(style.getName());
         var dto = style.toDTO();
-        var captor = ArgumentCaptor.forClass(Style.class);
+        var captor = ArgumentCaptor.forClass(String.class);
 
-        given(validator.validate(createCommand)).willReturn(Mono.just(createCommand));
         given(styleRepository.saveOrUpdate(captor.capture())).willReturn(Mono.just(style));
 
-        StepVerifier.create(styleService.save(createCommand))
+        StepVerifier.create(styleService.upsert(style.getName()))
                 .expectNext(dto)
                 .verifyComplete();
 
-        verify(validator, times(1)).validate(createCommand);
-        verify(styleRepository, times(1)).saveOrUpdate(any());
-
-        assertThat(captor.getValue().getName()).isEqualTo(style.getName());
-    }
-
-    @Test
-    void deleteDelegatesCommandValidation() {
-        final String error = "test violation";
-        final ConstraintViolationException exception = TestUtil.getConstraintViolationException(error);
-        final Style style = getStyle();
-        final StyleCommand.Delete command = new StyleCommand.Delete(style.getName());
-
-        given(validator.validate(command)).willReturn(Mono.error(exception));
-
-        StepVerifier.create(styleService.delete(command))
-                .expectErrorSatisfies(err -> {
-                    assertTrue(err.getMessage().contains(error));
-                    assertEquals(ConstraintViolationException.class, err.getClass());
-                })
-                .verify();
-        verify(validator, times(1)).validate(command);
-        verifyNoInteractions(styleRepository);
+        verify(styleRepository, times(1)).saveOrUpdate(style.getName());
+        assertThat(captor.getValue()).isEqualTo(style.getName());
     }
 
     @Test
     void deleteCallsRepositoryDelete() {
         final Style style = getStyle();
-        final StyleCommand.Delete cmd = new StyleCommand.Delete(style.getName());
-        final StyleDTO dto = style.toDTO();
-        assertNotNull(dto);
 
-        given(validator.validate(cmd)).willReturn(Mono.just(cmd));
         given(styleRepository.deleteById(style.getName())).willReturn(Mono.empty());
+        StepVerifier.create(styleService.delete(style.getName())).verifyComplete();
 
-        StepVerifier.create(styleService.delete(cmd)).verifyComplete();
-        verify(validator, times(1)).validate(cmd);
         verify(styleRepository, times(1)).deleteById(style.getName());
     }
 

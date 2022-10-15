@@ -2,27 +2,24 @@ package io.dsub.discogs.api.release.model;
 
 import io.dsub.discogs.api.core.entity.PersistableBaseEntity;
 import io.dsub.discogs.api.parser.ReleaseDate;
-import io.dsub.discogs.api.parser.ReleaseDateParser;
 import io.dsub.discogs.api.release.command.ReleaseCommand;
 import io.dsub.discogs.api.release.dto.ReleaseDTO;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.ToString;
+import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
-import reactor.core.publisher.Mono;
 
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+@With
 @Getter
 @ToString
 @Builder
 @AllArgsConstructor
+@EqualsAndHashCode(callSuper = false)
 @Table(name = "release")
 public class Release extends PersistableBaseEntity<Long> {
     @Id
@@ -44,19 +41,19 @@ public class Release extends PersistableBaseEntity<Long> {
     private String dataQuality;
 
     @Column("has_valid_day")
-    private boolean hasValidDay;
+    private Boolean hasValidDay;
 
     @Column("has_valid_month")
-    private boolean hasValidMonth;
+    private Boolean hasValidMonth;
 
     @Column("has_valid_year")
-    private boolean hasValidYear;
+    private Boolean hasValidYear;
 
     @Column("master_id")
     private Long masterId;
 
     @Column("is_master")
-    private boolean isMaster;
+    private Boolean isMaster;
 
     @Column("notes")
     private String notes;
@@ -109,7 +106,6 @@ public class Release extends PersistableBaseEntity<Long> {
                 .title(command.getTitle())
                 .build();
     }
-
     public static Release fromCreateCommand(ReleaseCommand.Create command, ReleaseDate date) {
         return Release.builder()
                 .id(command.getId())

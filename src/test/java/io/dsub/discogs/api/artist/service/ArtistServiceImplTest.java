@@ -40,15 +40,12 @@ class ArtistServiceImplTest extends ConcurrentTest {
     @Mock
     ArtistRepository artistRepository;
 
-    Validator validator;
-
     ArtistService artistService;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        validator = Mockito.spy(new ValidatorImpl(TestUtil.getNoOpValidator()));
-        this.artistService = new ArtistServiceImpl(artistRepository, validator);
+        this.artistService = new ArtistServiceImpl(artistRepository);
     }
 
     @Test
@@ -104,44 +101,6 @@ class ArtistServiceImplTest extends ConcurrentTest {
             assertEquals(expected, got);
         });
     }
-
-    @Test
-    void insertOrUpdateThrowsIfMissingName() {
-        Create command =
-                new Create(3L, null, null, null, null);
-
-        String error = "test error message";
-
-        given(validator.validate(command))
-                .willReturn(Mono.error(new RuntimeException(error)));
-
-        ArgumentCaptor<Create> argumentCaptor =
-                ArgumentCaptor.forClass(Create.class);
-
-        StepVerifier.create(artistService.upsert(command))
-                .expectErrorMessage(error)
-                .verify();
-
-        verifyNoInteractions(artistRepository);
-    }
-
-    @Test
-    void insertOrUpdateWillNotCallArtistRepositoryWithError() {
-        String error = "test error message";
-
-        given(validator.validate(any()))
-                .willReturn(Mono.error(new RuntimeException(error)));
-
-        ArgumentCaptor<Create> captor =
-                ArgumentCaptor.forClass(Create.class);
-
-        StepVerifier.create(artistService.upsert(null))
-                .expectErrorMessage(error)
-                .verify();
-
-        verifyNoInteractions(artistRepository);
-    }
-
     @Test
     void updateCallsRepositoryUpdate() {
         var artist = TestUtil.getInstanceOf(Artist.class);
@@ -167,6 +126,9 @@ class ArtistServiceImplTest extends ConcurrentTest {
 
         var received = captor.getValue();
         assertThat(received).isEqualTo(expectedReceived);
+
+        verify(artistRepository, times(1)).findById(id);
+        verify(artistRepository, times(1)).save(expectedReceived);
     }
 
     @Test

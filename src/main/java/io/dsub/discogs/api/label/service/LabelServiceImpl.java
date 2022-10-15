@@ -1,6 +1,5 @@
 package io.dsub.discogs.api.label.service;
 
-import io.dsub.discogs.api.core.exception.ItemNotFoundException;
 import io.dsub.discogs.api.label.command.LabelCommand;
 import io.dsub.discogs.api.label.dto.LabelDTO;
 import io.dsub.discogs.api.label.model.Label;
@@ -21,7 +20,6 @@ import java.util.function.Function;
 public class LabelServiceImpl implements LabelService {
 
     private final LabelRepository labelRepository;
-    private final Validator validator;
     private final Function<Label, Mono<LabelDTO>> toDTO =
             label -> Mono.just(label.toDTO());
 
@@ -52,17 +50,15 @@ public class LabelServiceImpl implements LabelService {
 
     @Override
     public Mono<LabelDTO> update(long id, LabelCommand.Update command) {
-        return validate(command)
-                .flatMap(cmd -> labelRepository.findById(id))
+        return labelRepository.findById(id)
                 .flatMap(label -> Mono.just(label.withMutableDataFrom(command)))
                 .flatMap(labelRepository::save)
-                .flatMap(toDTO)
-                .switchIfEmpty(Mono.error(ItemNotFoundException.getInstance()));
+                .flatMap(toDTO);
     }
 
     @Override
     public Mono<LabelDTO> upsert(LabelCommand.Create command) {
-        return validate(command)
+        return Mono.just(command)
                 .flatMap(createCommandToLabelMono)
                 .flatMap(labelRepository::saveOrUpdate)
                 .flatMap(toDTO);
@@ -77,16 +73,9 @@ public class LabelServiceImpl implements LabelService {
     public Mono<LabelDTO> findById(long id) {
         return labelRepository
                 .findById(id)
-                .flatMap(toDTO)
-                .switchIfEmpty(Mono.error(ItemNotFoundException.getInstance()));
+                .flatMap(toDTO);
     }
-
     private Mono<Long> count() {
         return labelRepository.count();
-    }
-
-    @Override
-    public <T> Mono<T> validate(T item) {
-        return this.validator.validate(item);
     }
 }

@@ -37,15 +37,12 @@ class GenreServiceImplTest extends ConcurrentTest {
     @Mock
     GenreRepository genreRepository;
 
-    @Mock
-    Validator validator;
-
     GenreServiceImpl genreService;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        genreService = new GenreServiceImpl(genreRepository, validator);
+        genreService = new GenreServiceImpl(genreRepository);
     }
 
     @Test
@@ -115,80 +112,32 @@ class GenreServiceImplTest extends ConcurrentTest {
     }
 
     @Test
-    void saveDelegatesValidationToValidator() {
-        final String error = "test violation";
-        final ConstraintViolationException constraintViolationException = TestUtil.getConstraintViolationException(error);
-
-        GenreCommand.Create testInvalidCommand = new GenreCommand.Create("my test genre");
-
-        given(validator.validate(testInvalidCommand)).willReturn(Mono.error(constraintViolationException));
-
-        StepVerifier.create(genreService.save(testInvalidCommand))
-                .expectErrorSatisfies(err -> {
-                    assertEquals(ConstraintViolationException.class, err.getClass());
-                    assertTrue(err.getMessage().contains(error));
-                })
-                .verify();
-
-        verify(validator, times(1)).validate(testInvalidCommand);
-        verifyNoInteractions(genreRepository);
-    }
-
-    @Test
     void saveCallsRepositorySave() {
         final var genre = getGenre();
-        final var createCommand = new GenreCommand.Create(genre.getName());
         final var dto = genre.toDTO();
+
         assertNotNull(dto);
         final var captor = ArgumentCaptor.forClass(Genre.class);
 
-        given(validator.validate(createCommand))
-                .willReturn(Mono.just(createCommand));
         given(genreRepository.saveOrUpdate(captor.capture()))
                 .willReturn(Mono.just(genre));
 
-        StepVerifier.create(genreService.save(createCommand))
+        StepVerifier.create(genreService.save(genre.getName()))
                 .expectNext(dto)
                 .verifyComplete();
 
-        verify(validator, times(1)).validate(createCommand);
         verify(genreRepository, times(1)).saveOrUpdate(any());
-
         assertEquals(genre.getName(), captor.getValue().getName());
     }
-
-    @Test
-    void deleteDelegatesCommandValidation() {
-        final String error = "test violation";
-        final ConstraintViolationException exception = TestUtil.getConstraintViolationException(error);
-        final Genre genre = getGenre();
-        final GenreCommand.Delete command = new GenreCommand.Delete(genre.getName());
-
-        given(validator.validate(command)).willReturn(Mono.error(exception));
-
-        StepVerifier.create(genreService.delete(command))
-                .expectErrorSatisfies(err -> {
-                    assertTrue(err.getMessage().contains(error));
-                    assertEquals(ConstraintViolationException.class, err.getClass());
-                })
-                .verify();
-
-        verify(validator, times(1)).validate(command);
-        verifyNoInteractions(genreRepository);
-    }
-
     @Test
     void deleteCallsRepositorySave() {
         final Genre genre = getGenre();
-        final GenreCommand.Delete cmd = new GenreCommand.Delete(genre.getName());
         final GenreDTO dto = genre.toDTO();
         assertNotNull(dto);
 
-        given(validator.validate(cmd)).willReturn(Mono.just(cmd));
         given(genreRepository.deleteById(genre.getName())).willReturn(Mono.empty());
 
-        StepVerifier.create(genreService.delete(cmd)).verifyComplete();
-        verify(validator, times(1)).validate(cmd);
+        StepVerifier.create(genreService.delete(genre.getName())).verifyComplete();
         verify(genreRepository, times(1)).deleteById(genre.getName());
     }
 
