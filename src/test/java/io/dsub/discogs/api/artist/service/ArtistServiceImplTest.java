@@ -72,7 +72,7 @@ class ArtistServiceImplTest extends ConcurrentTest {
     @Test
     void getArtistsByPageAndSizeWithNoArtists() {
         Pageable pageRequest = PageRequest.of(0, 5);
-        given(artistRepository.findAll(pageRequest.getSort())).willReturn(Flux.empty());
+        given(artistRepository.findAllBy(pageRequest)).willReturn(Flux.empty());
         given(artistRepository.count()).willReturn(Mono.just((long) 0));
 
         Page<ArtistDTO> page = artistService.findAllByPage(pageRequest).block();
@@ -86,7 +86,7 @@ class ArtistServiceImplTest extends ConcurrentTest {
     void getArtistsByPageAndSizeWithSomeArtists() {
         Pageable pageRequest = PageRequest.of(0, 5);
         var artists = IntStream.range(0, 5).mapToObj(i -> TestUtil.getInstanceOf(Artist.class)).toList();
-        given(artistRepository.findAll(pageRequest.getSort())).willReturn(Flux.fromIterable(artists));
+        given(artistRepository.findAllBy(pageRequest)).willReturn(Flux.fromIterable(artists));
         given(artistRepository.count()).willReturn(Mono.just((long) 5));
 
         Iterator<Artist> artistIterator = artists.iterator();

@@ -28,7 +28,7 @@ public class ArtistServiceImpl implements ArtistService {
 
     @Override
     public Mono<Page<ArtistDTO>> findAllByPage(Pageable pageable) {
-        Flux<ArtistDTO> sortedDTOs = artistRepository.findAll(pageable.getSort()).flatMap(toDTO);
+        Flux<ArtistDTO> sortedDTOs = artistRepository.findAllBy(pageable).flatMap(toDTO);
         return getPagedResult(count(), pageable, sortedDTOs);
     }
 

@@ -16,7 +16,6 @@ import java.time.LocalDateTime;
 
 @With
 @Getter
-@ToString
 @Builder
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)

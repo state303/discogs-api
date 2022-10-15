@@ -12,17 +12,14 @@ public class ReleaseDateParserImpl implements ReleaseDateParser {
 
     private static final Pattern YEAR_MONTH_DATE_PATTERN =
             Pattern.compile("^[._/ -]*(?<year>[^._/ -]{4})[._/ -]*(?<month>[^._/ -]{1,2}[._/ -]*)$");
-
     private static final Pattern YEAR_DATE_PATTERN =
             Pattern.compile("^[._/ -]*(?<year>[^._/ -]{4})[._/ -]*$");
-
 
     private static final Pattern DIGIT_PATTERN = Pattern.compile("^\\d+$");
     private static final Pattern YEAR_PATTERN = Pattern.compile("^\\d{4}$");
     private static final Pattern MONTH_PATTERN = Pattern.compile("^(0?[1-9]|1[0-2])$");
     private static final Pattern DAY_PATTERN = Pattern.compile("^(0?[1-9]|[1-2][0-9]|3[0-1])$");
     private static final Pattern NON_DIGIT_NON_DELIM_PATTERN = Pattern.compile("[^\\d._/ -]");
-
     private static final Pattern DELIM_PATTERN = Pattern.compile("[._/ -]");
     private static final ReleaseDate FALLBACK = ReleaseDate.builder().build();
 
@@ -77,7 +74,7 @@ public class ReleaseDateParserImpl implements ReleaseDateParser {
     }
 
     private ReleaseDate applyMonth(ReleaseDate date, String monthStr) {
-        if (isValidMonth(monthStr)) {
+        if (date.isValidYear() && isValidMonth(monthStr)) {
             return date.withMonth(Integer.parseInt(monthStr), true);
         } else {
             var replaced = replaceNonDigits(monthStr);
@@ -148,7 +145,6 @@ public class ReleaseDateParserImpl implements ReleaseDateParser {
         }
         return false;
     }
-
     private boolean isValidYear(String in) {
         return YEAR_PATTERN.matcher(in).matches();
     }

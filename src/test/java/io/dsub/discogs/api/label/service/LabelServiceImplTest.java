@@ -70,14 +70,14 @@ class LabelServiceImplTest extends ConcurrentTest {
         List<LabelDTO> expectedContent = labels.stream().map(Label::toDTO).toList();
         Page<LabelDTO> expectedPage = new PageImpl<>(expectedContent, pageable, 10);
 
-        given(labelRepository.findAll(pageable.getSort())).willReturn(Flux.fromIterable(labels));
+        given(labelRepository.findAllBy(pageable)).willReturn(Flux.fromIterable(labels));
         given(labelRepository.count()).willReturn(Mono.just((long) 10));
 
         StepVerifier.create(labelService.findAllByPage(pageable))
                 .expectNext(expectedPage)
                 .verifyComplete();
 
-        verify(labelRepository, times(1)).findAll(pageable.getSort());
+        verify(labelRepository, times(1)).findAllBy(pageable);
     }
 
     @Test

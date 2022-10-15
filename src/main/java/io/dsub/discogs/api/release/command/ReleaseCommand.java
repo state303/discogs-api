@@ -54,12 +54,4 @@ public abstract class ReleaseCommand {
         private final String releaseDate;
         private final Boolean isMaster;
     }
-
-    @Getter
-    @AllArgsConstructor
-    public static final class DeleteByID {
-        @Min(0)
-        @NotNull
-        private final Long id;
-    }
 }

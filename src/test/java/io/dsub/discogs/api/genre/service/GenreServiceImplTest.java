@@ -72,10 +72,10 @@ class GenreServiceImplTest extends ConcurrentTest {
         int size = 10;
 
         Flux<Genre> genreFlux = Flux.fromIterable(getGenres(size));
-        ArgumentCaptor<Sort> captor = ArgumentCaptor.forClass(Sort.class);
+        ArgumentCaptor<Pageable> captor = ArgumentCaptor.forClass(Pageable.class);
         Pageable pageable = PageRequest.of(0, size);
 
-        given(genreRepository.findAll(captor.capture())).willReturn(genreFlux);
+        given(genreRepository.findAllBy(captor.capture())).willReturn(genreFlux);
         given(genreRepository.count()).willReturn(Mono.just((long) size));
 
         Mono<Page<GenreDTO>> result = genreService.findAllByPage(pageable);
@@ -87,8 +87,8 @@ class GenreServiceImplTest extends ConcurrentTest {
         assertEquals(size, page.getTotalElements());
         assertEquals(1, page.getTotalPages());
 
-        verify(genreRepository, times(1)).findAll(pageable.getSort());
-        assertEquals(pageable.getSort(), captor.getValue());
+        verify(genreRepository, times(1)).findAllBy(pageable);
+        assertEquals(pageable, captor.getValue());
     }
 
     @Test
@@ -96,8 +96,8 @@ class GenreServiceImplTest extends ConcurrentTest {
         Flux<Genre> emptyGenreFlux = Flux.empty();
         final Pageable pageable = PageRequest.of(0, 1);
 
-        ArgumentCaptor<Sort> captor = ArgumentCaptor.forClass(Sort.class);
-        given(genreRepository.findAll(captor.capture())).willReturn(emptyGenreFlux);
+        ArgumentCaptor<Pageable> captor = ArgumentCaptor.forClass(Pageable.class);
+        given(genreRepository.findAllBy(captor.capture())).willReturn(emptyGenreFlux);
         given(genreRepository.count()).willReturn(Mono.just((long) 0));
 
         Mono<Page<GenreDTO>> result = genreService.findAllByPage(pageable);
@@ -107,8 +107,8 @@ class GenreServiceImplTest extends ConcurrentTest {
 
         assertEquals(0, page.getTotalElements());
         assertEquals(0, page.getTotalPages());
-        verify(genreRepository, times(1)).findAll(pageable.getSort());
-        assertEquals(pageable.getSort(), captor.getValue());
+        verify(genreRepository, times(1)).findAllBy(pageable);
+        assertEquals(pageable, captor.getValue());
     }
 
     @Test

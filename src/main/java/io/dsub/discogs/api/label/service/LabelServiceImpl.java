@@ -44,7 +44,7 @@ public class LabelServiceImpl implements LabelService {
 
     @Override
     public Mono<Page<LabelDTO>> findAllByPage(Pageable pageable) {
-        Flux<LabelDTO> sortedDTOs = labelRepository.findAll(pageable.getSort()).flatMap(toDTO);
+        Flux<LabelDTO> sortedDTOs = labelRepository.findAllBy(pageable).flatMap(toDTO);
         return getPagedResult(count(), pageable, sortedDTOs);
     }
 

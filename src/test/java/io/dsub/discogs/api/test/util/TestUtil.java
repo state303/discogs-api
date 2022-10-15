@@ -59,6 +59,8 @@ public class TestUtil {
             return getRandomString();
         } else if (clazz.isAssignableFrom(Boolean.class)) {
             return Boolean.FALSE;
+        } else if (clazz.isAssignableFrom(Short.class)) {
+            return (short) RANDOM.nextInt(1, Short.MAX_VALUE);
         }
         return null;
     }

@@ -34,7 +34,7 @@ public class ReleaseServiceImpl implements ReleaseService {
 
     @Override
     public Mono<Page<ReleaseDTO>> findAllByPage(Pageable pageable) {
-        Flux<ReleaseDTO> dtoFlux = repository.findAll(pageable.getSort()).flatMap(toReleaseDTO);
+        Flux<ReleaseDTO> dtoFlux = repository.findAllBy(pageable).flatMap(toReleaseDTO);
         return getPagedResult(repository.count(), pageable, dtoFlux);
     }
 

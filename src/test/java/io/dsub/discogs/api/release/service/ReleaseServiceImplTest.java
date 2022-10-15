@@ -1,12 +1,9 @@
 package io.dsub.discogs.api.release.service;
 
-import io.dsub.discogs.api.core.exception.ItemNotFoundException;
 import io.dsub.discogs.api.release.command.ReleaseCommand;
-import io.dsub.discogs.api.release.dto.ReleaseDTO;
 import io.dsub.discogs.api.release.model.Release;
 import io.dsub.discogs.api.release.repository.ReleaseRepository;
 import io.dsub.discogs.api.test.util.TestUtil;
-import io.dsub.discogs.api.validator.Validator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -21,7 +18,6 @@ import reactor.test.StepVerifier;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -32,7 +28,6 @@ import static org.mockito.Mockito.*;
 class ReleaseServiceImplTest {
     @Mock
     ReleaseRepository repository;
-
     ReleaseServiceImpl releaseService;
 
     @BeforeEach
@@ -43,9 +38,9 @@ class ReleaseServiceImplTest {
 
     @Test
     void findAllReturnsAllItems() {
-        List<Release> releases = IntStream.range(0, 10).mapToObj(i -> getRandomRelease()).toList();
-        List<ReleaseDTO> expectedDTOs = releases.stream().map(Release::toDTO).toList();
-        Flux<Release> releasesFlux = Flux.fromIterable(releases);
+        var releases = IntStream.range(0, 10).mapToObj(i -> getRandomRelease()).toList();
+        var expectedDTOs = releases.stream().map(Release::toDTO).toList();
+        var releasesFlux = Flux.fromIterable(releases);
         given(repository.findAll()).willReturn(releasesFlux);
 
         StepVerifier.create(releaseService.findAll())
@@ -60,7 +55,7 @@ class ReleaseServiceImplTest {
         List<Release> releases = IntStream.range(0, 10).mapToObj(i -> getRandomRelease()).toList();
         int pageSize = releases.size() / 2;
         Pageable pageable = PageRequest.of(0, pageSize);
-        given(repository.findAll(pageable.getSort())).willReturn(Flux.fromIterable(releases));
+        given(repository.findAllBy(pageable)).willReturn(Flux.fromIterable(releases));
         given(repository.count()).willReturn(Mono.just(10L));
 
         StepVerifier.create(releaseService.findAllByPage(pageable))
@@ -71,7 +66,7 @@ class ReleaseServiceImplTest {
                         page.getNumber() == 0)
                 .verifyComplete();
 
-        verify(repository, times(1)).findAll(pageable.getSort());
+        verify(repository, times(1)).findAllBy(pageable);
     }
 
     @Test

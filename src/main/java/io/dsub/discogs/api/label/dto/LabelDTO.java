@@ -6,7 +6,7 @@ import lombok.*;
 @Data
 @Builder
 public final class LabelDTO {
-    private final long id;
+    private final Long id;
     private final String contactInfo;
     private final String dataQuality;
     private final String name;

@@ -1,9 +1,11 @@
 package io.dsub.discogs.api.label.repository;
 
 import io.dsub.discogs.api.label.model.Label;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.r2dbc.repository.Query;
 import org.springframework.data.r2dbc.repository.R2dbcRepository;
 import org.springframework.stereotype.Repository;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Repository
@@ -19,4 +21,6 @@ public interface LabelRepository extends R2dbcRepository<Label, Long> {
             "parent_label_id=:#{[0].parentLabelID} " +
             "WHERE id=:#{[0].id}")
     Mono<Label> saveOrUpdate(Label label);
+
+    Flux<Label> findAllBy(Pageable pageable);
 }

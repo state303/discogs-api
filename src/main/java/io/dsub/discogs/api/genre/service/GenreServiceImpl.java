@@ -27,7 +27,7 @@ public class GenreServiceImpl implements GenreService {
 
     @Override
     public Mono<Page<GenreDTO>> findAllByPage(Pageable pageable) {
-        Flux<GenreDTO> sortedDTO = genreRepository.findAll(pageable.getSort()).flatMap(toDTO);
+        Flux<GenreDTO> sortedDTO = genreRepository.findAllBy(pageable).flatMap(toDTO);
         return getPagedResult(count(), pageable, sortedDTO);
     }
 

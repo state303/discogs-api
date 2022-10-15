@@ -44,9 +44,9 @@ public class ReleaseDate {
     }
 
     public LocalDate toLocalDate() {
-        int y = this.isValidYear() ? this.year : 0;
-        int m = this.isValidMonth() ? this.month : 1;
-        int d = this.isValidDay() ? this.day : 1;
+        int y = this.year < 0 ? 0 : this.year;
+        int m = this.month < 1 ? 1 : this.month;
+        int d = this.day < 1 ? 1 : this.day;
         return LocalDate.of(y, m, d);
     }
 }
