@@ -1,25 +1,17 @@
-# https://github.com/marketplace/actions/labeler
-
-# Add 'documentation' label for changes to documentation
-documentation: '**/*.{html,md,txt}'
-
-# Add 'i18n' label for changes to localisation
-i18n: '**/assets/*/lang/*'
-
-# Add 'assets' label for changes to assets (except localisation)
+documentation:
+  - changed-files:
+      - any-glob-to-any-file: '**/*.{html,md,txt}'
+i18n:
+  - changed-files:
+      - any-glob-to-any-file: '**/assets/*/lang/*'
 assets:
-  - any: ['**/assets/**/*', '!**/assets/*/lang/*']
-
-# Add 'ci' label for changes to the deployment process
+  - all:
+      - changed-files:
+          - any-glob-to-any-file: '**/assets/**/*'
+          - all-globs-to-all-files: '!**/assets/*/lang/*'
 ci:
-  - '.releaserc*'
-  - any: ['.github/workflows/**/*', '!.github/workflows/build.yml']
-  - '.github/labeler.yml'
-
-# Add 'build' label for changes to the build process
+  - changed-files:
+      - any-glob-to-any-file: ['.releaserc*', '.github/**/*']
 build:
-  - '**/build.gradle'
-  - '**/gradle.properties'
-  - '**/settings.gradle'
-  - '.github/workflows/build.yml'
-
+  - changed-files:
+      - any-glob-to-any-file: ['**/build.gradle', '**/gradle.properties', '**/settings.gradle']

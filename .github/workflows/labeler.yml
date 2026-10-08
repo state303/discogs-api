@@ -1,16 +1,15 @@
-# Labels new pull requests based on the paths of files being changed
-# See https://github.com/marketplace/actions/labeler
 name: Labeler
 
-# On pull requests
 on: [pull_request_target]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
 
 jobs:
   triage:
     name: Label
     runs-on: ubuntu-latest
     steps:
-      - name: 🔖 Label
-        uses: actions/labeler@v3
-        with:
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/labeler@b8dd2d9be0f68b860e7dae5dae7d772984eacd6d # v6.2.0

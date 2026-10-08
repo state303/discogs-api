@@ -8,12 +8,17 @@ on:
       - main
   workflow_dispatch:
 
+permissions:
+  contents: write
+  pull-requests: write
+  packages: write
+
 jobs:
   release:
     name: Release
     runs-on: ubuntu-latest
     steps:
-      - name: 🙌 Prepare release
+      - name: Prepare release
         id: release-please
         uses: google-github-actions/release-please-action@v3
         with:
@@ -31,35 +36,38 @@ jobs:
 
     runs-on: ubuntu-latest
     needs: release
-    if: ${{ needs.release.outputs.release_created }}
+    if: needs.release.outputs.release_created == 'true'
 
     steps:
-      - name: ✨ Checkout repository
-        uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.release.outputs.tag_name }}
+          persist-credentials: false
 
-      - name: ☕ Set up JDK 17
-        uses: actions/setup-java@v3
+      - name: Set up JDK 17
+        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5.7.0
         with:
           java-version: 17
-          distribution: adopt
+          distribution: temurin
 
-      - name: 🐘 Set up Gradle
-        uses: gradle/gradle-build-action@67421db6bd0bf253fb4bd25b31ebb98943c375e1
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6.3.0
 
-      - name: 📢 Publish new release
+      - name: Publish new release
         run: ./gradlew build
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: 📦 Upload artifacts
-        uses: softprops/action-gh-release@v1
+      - name: Upload artifacts
+        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2.6.2
         with:
           tag_name: ${{ needs.release.outputs.tag_name }}
           files: '**/build/libs/*'
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: 🚀 Publish new package
+      - name: Publish new package
         run: ./gradlew publish
         env:
-          GITHUB_ACTOR: ${{ secrets.GITHUB_ACTOR }}
+          GITHUB_ACTOR: ${{ github.actor }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
