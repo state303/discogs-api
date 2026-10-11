@@ -1,6 +1,6 @@
-# Discogs API prototype
+# Discogs API prototype (archived)
 
-This repository is an early Java/Gradle project skeleton. It does not contain
+This archived repository is an early Java/Gradle project skeleton. It does not contain
 an implemented API. For new deployments, use
 [Go OpenDiscogs API](https://github.com/dsub-io/go-open-discogs-api) and
 [Go OpenDiscogs Batch](https://github.com/dsub-io/go-open-discogs-batch).
@@ -10,7 +10,7 @@ The canonical PostgreSQL schema is maintained in
 The separate [Java OpenDiscogs API](https://github.com/dsub-io/open-discogs-api)
 is deprecated.
 
-## Development
+## Historical development
 
 The existing Gradle project uses JDK 17. Build it with the checked-in wrapper:
 
